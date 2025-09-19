@@ -204,7 +204,7 @@ const groupedSkills = computed<GroupedSkillSection[]>(() => {
       <div class="h-fit mx-auto my-0 max-w-1/2 dots-border-top !border-base-300">
       </div>
     </div>
-    <div v-if="cvStore.cvData.publications && cvStore.cvData.publications.length > 0"
+    <!--<div v-if="cvStore.cvData.publications && cvStore.cvData.publications.length > 0"
       class="p-1 rounded-sm bg-base-100">
       <div class="border-2 border-dotted rounded-sm bg-base-100 border-base-200 post-content">
         <h2 class="p-2 pb-0">{{ tStatic('publications') }}</h2>
@@ -212,7 +212,7 @@ const groupedSkills = computed<GroupedSkillSection[]>(() => {
           <publications-timeline :items="cvStore.cvData.publications" milestone-style="diamond" />
         </div>
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 <style scoped>

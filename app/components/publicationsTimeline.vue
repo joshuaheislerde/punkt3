@@ -51,17 +51,17 @@ const API_URL: string = config.public.apiURL
                 </template>
                 {{ author.last_name }}
               </span>
-              <span v-if="pub.authors && idx < pub.authors.length - 1">, </span>;
-            </template>
+              <span v-if="pub.authors && idx < pub.authors.length - 1">, </span>
+            </template>; 
           </span>
           <span v-if="pub.file" class="font-normal"> <a :href="`${API_URL}/assets/${pub.file}`">"{{ pub.title }}"</a>;</span>
           <span v-else class="font-normal"> "{{ pub.title }}";</span>
           <span class="italic">
-            {{ pub.journal || pub.conference }}
+            &nbsp;{{ pub.journal || pub.conference }}
           </span>
           <span v-if="pub.publisher">; {{ pub.publisher }}</span>
           <span v-if="pub.location">; {{ pub.location }}</span>
-          <span v-if="pub.year">; {{ pub.year }}</span>
+          <span v-if="pub.year">; {{ pub.year }}.</span>
           <span v-for="(field, index) in pub.additional_fields" :key="field.value">
             , {{ field.name }}
           </span>
