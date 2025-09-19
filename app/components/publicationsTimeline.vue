@@ -10,6 +10,10 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   milestoneStyle: 'circle'
 })
+
+const config = useRuntimeConfig()
+const API_URL: string = config.public.apiURL
+
 </script>
 
 <template>
@@ -35,29 +39,29 @@ const props = withDefaults(defineProps<Props>(), {
         <span class="-mt-2">
           <span>
             <template v-for="(author, idx) in pub.authors">
-              <span class="font-semibold">
+              <span class="font-bold" v-if="author.first_name === 'Joshua' && author.last_name === 'Heisler'">
                 <template v-if="author.first_name">
                   {{author.first_name.split(' ').map((n: string) => n[0] + '.').join(' ')}}
                 </template>
                 {{ author.last_name }}
               </span>
-              <span v-if="pub.authors && idx < pub.authors.length - 1">, </span>
+              <span class="font-semibold" v-else>
+                <template v-if="author.first_name">
+                  {{author.first_name.split(' ').map((n: string) => n[0] + '.').join(' ')}}
+                </template>
+                {{ author.last_name }}
+              </span>
+              <span v-if="pub.authors && idx < pub.authors.length - 1">, </span>;
             </template>
           </span>
-          ,
-          <span class="font-normal"> "{{ pub.title }}"</span>,
+          <span v-if="pub.file" class="font-normal"> <a :href="`${API_URL}/assets/${pub.file}`">"{{ pub.title }}"</a>;</span>
+          <span v-else class="font-normal"> "{{ pub.title }}";</span>
           <span class="italic">
             {{ pub.journal || pub.conference }}
           </span>
-          <span v-if="pub.publisher">
-            , {{ pub.publisher }}
-          </span>
-          <span v-if="pub.location">
-            , {{ pub.location }}
-          </span>
-          <span v-if="pub.year">
-            , {{ pub.year }}
-          </span>
+          <span v-if="pub.publisher">; {{ pub.publisher }}</span>
+          <span v-if="pub.location">; {{ pub.location }}</span>
+          <span v-if="pub.year">; {{ pub.year }}</span>
           <span v-for="(field, index) in pub.additional_fields" :key="field.value">
             , {{ field.name }}
           </span>

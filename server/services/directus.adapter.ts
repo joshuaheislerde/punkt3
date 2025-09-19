@@ -286,7 +286,8 @@ class DirectusAdapter {
                 year: pub.year,
                 conference: pub.conference,
                 journal: pub.journal,
-                url: pub.link
+                url: pub.url,
+                file: pub.file
             })) || [],
             translations: directusData.translations?.map((trans: any) => ({
                 languages_code: trans.languages_code,

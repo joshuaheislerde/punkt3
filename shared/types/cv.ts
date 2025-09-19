@@ -97,6 +97,7 @@ export interface Publication {
     conference: string | null;
     journal: string | null;
     url: string | null;
+    file: string | null;
     additional_fields: { name: string; value: string }[] | null; // value is only used as key, for now 
 }
 
