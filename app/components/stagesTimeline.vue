@@ -71,7 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
                   <div v-else-if="stage.until_today">{{ tStatic('today') }}</div>
                 </div>
                 <span v-if="t(stage, 'employment_level') && type === 'career'" class="text-sm">
-                  ({{ t(stage, 'employment_level') }})
+                  &nbsp;({{ t(stage, 'employment_level') }})
                 </span>
               </div>
               <div>{{ t(stage, 'location') }}</div>

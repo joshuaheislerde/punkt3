@@ -69,20 +69,20 @@ class DirectusAdapter {
             // Map the fields from Directus data to the Contact interface
             // Adjust the field names as necessary based on your Directus schema
             // Example mapping:
-            // id: directusData.id,
-            // email: directusData.email,
-            // phone: directusData.phone,
-            // address: directusData.address,
-            // socials: directusData.socials?.map((social: any) => ({
-            //     id: social.id,
-            //     platform: social.platform,
-            //     url: social.url,
-            //     icon: social.icon,
-            // })) || [],
-            // translations: directusData.translations?.map((translation: any) => ({
-            //     languages_code: translation.languages_code,
-            //     contact_text: translation.contact_text,
-            // })) || []
+            id: directusData.id,
+            show_direct_message: directusData.show_direct_message,
+            socials: directusData.socials?.map((social: any) => ({
+                id: social.id,
+                name: social.name,
+                url: social.link,
+                icon: social.icon,
+            })) || [],
+            translations: directusData.translations?.map((translation: any) => ({
+                languages_code: translation.languages_code,
+                contact_introduction: translation.contact_introduction,
+                direct_message_introduction: translation.direct_message_introduction,
+                gdpr_info: translation.gdpr_info
+            })) || []
 
             /*
             ############
@@ -94,11 +94,11 @@ class DirectusAdapter {
 
     async getContactData(): Promise<Contact> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('Landing', {
+            const directusData = await (this.directus as any).request((readItems as any)('Contact', {
                 fields: [
                     '*',
                     'translations.*',
-                    'socials.contact_socials_id.*'
+                    'socials.*'
                 ]
             }))
             return this.convertToContact(directusData)
@@ -229,10 +229,10 @@ class DirectusAdapter {
                 status: stage.status,
                 until_today: stage.until_today,
                 date_display: stage.date_display,
-                use_in_accumulate_work_experience: stage.use_in_accumulate_work_years,
+                use_in_accumulate_work_experience: stage.use_in_accumulate_work_experience,
                 translations: stage.translations?.map((trans: any) => ({
                     languages_code: trans.languages_code,
-                    position: trans.role,
+                    position: trans.position,
                     company: trans.company,
                     location: trans.location,
                     additional_info: trans.additional_info,
@@ -292,7 +292,7 @@ class DirectusAdapter {
                 languages_code: trans.languages_code,
                 welcome_heading: trans.welcome_heading,
                 work_status: trans.work_status,
-                summary: trans.introduction_text,
+                summary: trans.summary,
                 skills_summary: trans.skills_introduction,
                 stages_summary: trans.life_stages_introduction,
                 additional_info: trans.additional_info

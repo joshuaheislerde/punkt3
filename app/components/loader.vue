@@ -21,7 +21,7 @@
             class="absolute flex items-center justify-center text-lg font-league-spartan text-secondary-content">
             <span
               class="flex items-center justify-center rounded-full size-9 bg-secondary ring ring-secondary"><span
-                class="mt-1 ">P3</span></span>
+                class="mt-1 ">JH</span></span>
           </div>
         </div>
       </div>

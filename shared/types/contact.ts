@@ -1,8 +1,6 @@
 export interface Contact {
     id: string | number;
     show_direct_message: boolean;
-    date_updated: string;
-    status: "published" | "draft" | "archived";
     socials: Social[];
     translations: ContactTranslation[];
 }

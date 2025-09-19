@@ -101,10 +101,10 @@ const groupedSkills = computed<GroupedSkillSection[]>(() => {
               tStatic('years_in_field') }}</div>
           </div>
           <div>
-            <div class="relative basis-32 shrink-0">
+            <div class="relative basis-32 shrink-0" v-if="cvStore.cvData.work_status_attention" >
               <div class="relative">{{ tStatic('career_status') }}</div>
             </div>
-            <div class="basis-4 shrink-0">
+            <div class="basis-4 shrink-0" v-if="cvStore.cvData.work_status_attention">
               <star-bling v-if="cvStore.cvData.work_status_attention"
                 class="relative -left-2.5 size-7" animation :interval="5000"></star-bling>
               <div v-else class="single-dot-secondary">
@@ -120,11 +120,11 @@ const groupedSkills = computed<GroupedSkillSection[]>(() => {
         </div>
         <div class="flex flex-col items-start justify-end gap-2 p-3 w-42 shrink-0">
           <div class="relative w-full">
-            <light-box v-if="cvStore.cvData.image"
+            <light-box v-if="cvImage"
               :img-src="`${API_URL}/assets/${cvImage}`" class="">
               <template #trigger="{ openLightbox }">
                 <picture class="self-center mt-0 shrink-0">
-                  <NuxtImg :src="`${API_URL}/assets/${cvImage}`" alt="Portrait of Ludwig Loth"
+                  <NuxtImg :src="`${API_URL}/assets/${cvImage}`" :alt="`Portrait of ${landingStore.landingData?.my_name}`"
                     class="relative object-cover object-center w-full h-40 transition-transform cursor-zoom-in outline-2 rounded-xs"
                     @click="openLightbox" />
                 </picture>
