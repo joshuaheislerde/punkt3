@@ -65,7 +65,7 @@ function handleHtmlClick(e: MouseEvent) {
                     <div
                         class="absolute block mt-4 w-22 h-22 sm:w-32 sm:h-32 -z-10 dots-border bg-base-300 rounded-xs ring-6 ring-base-100">
                     </div>
-                    <NuxtImg v-if="landingData" :src="`${API_URL}/assets/${landingData.image}`"
+                    <NuxtImg v-if="landingData" :src="`${API_URL}assets/${landingData.image}`"
                         :alt="`Portrait of ${landingData.my_name}`"
                         class="object-cover ml-4 w-22 h-22 sm:w-32 sm:h-32 outline-2 rounded-xs" />
                 </picture>

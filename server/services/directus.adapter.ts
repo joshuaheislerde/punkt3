@@ -19,24 +19,24 @@ class DirectusAdapter {
             // Map the fields from Directus data to the Landing interface
             // Adjust the field names as necessary based on your Directus schema
             // Example mapping:
-            // id: directusData.id,
-            // status: directusData.status,
-            // date_updated: directusData.date_updated,
-            // initials: directusData.initials,
-            // my_name: directusData.my_name,
-            // image: directusData.image,
-            // menu_items: directusData.menu_items?.map((item: any) => ({
-            //     id: item.id,
-            //     label: item.label,
-            //     link: item.link,
-            //     icon: item.icon,
-            //     sort: item.sort,
-            // })) || [],
-            // translations: directusData.translations?.map((translation: any) => ({
-            //     languages_code: translation.languages_code,
-            //     title: translation.title,
-            //     description: translation.description,
-            // })) || []
+            id: directusData.id,
+            status: directusData.status,
+            date_updated: directusData.date_updated,
+            initials: directusData.initials,
+            my_name: directusData.my_name,
+            image: directusData.image,
+            menu_items: directusData.menu_items?.map((item: any) => ({
+                id: item.id,
+                slug: item.slug,
+                sort: item.sort,
+                icon: item.icon,
+                translations: item.translations,
+            })) || [],
+            translations: directusData.translations?.map((translation: any) => ({
+                languages_code: translation.languages_code,
+                opening_line: translation.opening_line,
+                about_me_short: translation.about_me_short,
+            })) || []
 
             /*
             ############
@@ -48,13 +48,15 @@ class DirectusAdapter {
 
     async getLandingPageData(): Promise<Landing> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('<your landing page endpoint>', {
+            const directusData = await (this.directus as any).request((readItems as any)('Landing', {
                 fields: [
                     '*',
                     'translations.*',
-                    // add your queries for relational fields here
+                    'menu_items.*',
+                    'menu_items.translations.*'
                 ],
             }))
+            console.log(directusData)
             return this.convertToLanding(directusData)
         } catch (error) {
             console.error('Error fetching landing page data:', error);
@@ -92,7 +94,7 @@ class DirectusAdapter {
 
     async getContactData(): Promise<Contact> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('<your contact endpoint>', {
+            const directusData = await (this.directus as any).request((readItems as any)('Landing', {
                 fields: [
                     '*',
                     'translations.*',
@@ -173,7 +175,7 @@ class DirectusAdapter {
 
     async getProjectData(): Promise<Project[]> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('<your project endpoint>', {
+            const directusData = await (this.directus as any).request((readItems as any)('Landing', {
                 fields: [
                     '*',
                     'translations.*',
@@ -197,120 +199,119 @@ class DirectusAdapter {
             ############
             */
 
-            //     id: directusData.id,
-            //     status: directusData.status,
-            //     date_created: directusData.date_created,
-            //     date_updated: directusData.date_updated,
-            //     image: directusData.cv_image,
-            //     accumulate_work_experience: directusData.accumulate_work_years,
-            //     birthdate: directusData.birthdate,
-            //     work_status_attention: directusData.work_blink,
-            //     educational_stages: directusData.educational_stage_v2?.map((stage: any) => ({
-            //         id: stage.id,
-            //         from: stage.from,
-            //         to: stage.to,
-            //         until_today: stage.until_today,
-            //         date_display: stage.date_display,
-            //         final_grade: stage.final_grade,
-            //         translations: stage.translations?.map((trans: any) => ({
-            //             languages_code: trans.languages_code,
-            //             degree: trans.degree,
-            //             institution: trans.institution,
-            //             location: trans.location,
-            //             final_thesis_title: trans.final_thesis_title,
-            //             final_thesis_grade: trans.final_thesis_grade,
-            //             additional_info: trans.additional_info
-            //         })) || []
-            //     })) || [],
-            //     career_stages: directusData.career_stages_v2?.map((stage: any) => ({
-            //         id: stage.id,
-            //         from: stage.from,
-            //         to: stage.to,
-            //         status: stage.status,
-            //         until_today: stage.until_today,
-            //         date_display: stage.date_display,
-            //         use_in_accumulate_work_experience: stage.use_in_accumulate_work_years,
-            //         translations: stage.translations?.map((trans: any) => ({
-            //             languages_code: trans.languages_code,
-            //             position: trans.role,
-            //             company: trans.company,
-            //             location: trans.location,
-            //             additional_info: trans.additional_info,
-            //             employment_level: trans.employment_level
-            //         })) || [],
-            //     })) || [],
-            //     skills: directusData.skills_v2?.map((skill: any) => ({
-            //         id: skill.skills_id.id,
-            //         sort: skill.skills_id.sort,
-            //         tags: skill.skills_id.tags.map((tag: any) => ({
-            //             id: tag.tags_id.id,
-            //             value: tag.tags_id.value,
-            //             icon: tag.tags_id.icon,
-            //             color: tag.tags_id.color,
-            //             sort: tag.tags_id.sort,
-            //             translations: tag.tags_id.translations?.map((trans: any) => ({
-            //                 languages_code: trans.languages_code,
-            //                 name: trans.name,
-            //                 skill_level: trans.skill_level
-            //             })) || [],
-            //         })) || [],
-            //         section: {
-            //             id: skill.skills_id.section.section_id,
-            //             sort: skill.skills_id.section.sort,
-            //             date_created: skill.skills_id.section.date_created,
-            //             date_updated: skill.skills_id.section.date_updated,
-            //             translations: skill.skills_id.section.translations?.map((trans: any) => ({
-            //                 languages_code: trans.languages_code,
-            //                 heading: trans.heading,
-            //             })) || [],
-            //         },
-            //         translations: skill.skills_id.translations?.map((trans: any) => ({
-            //             languages_code: trans.languages_code,
-            //             subsection: trans.subsection
-            //         })) || []
-            //     })) || [],
-            //     publications: directusData.publications?.map((pub: any) => ({
-            //         id: pub.publications_id.id,
-            //         title: pub.publications_id.title,
-            //         subtitle: pub.publications_id.subtitle,
-            //         authors: pub.publications_id.authors?.map((author: any) => ({
-            //             prefix: author.prefix,
-            //             first_name: author.first_name,
-            //             last_name: author.last_name
-            //         })) || [],
-            //         publisher: pub.publications_id.publisher,
-            //         identifier: {
-            //             type: pub.publications_id.identifier_type,
-            //             value: pub.publications_id.identifier
-            //         },
-            //         location: pub.publications_id.location,
-            //         year: pub.publications_id.year,
-            //         conference: pub.publications_id.conference,
-            //         journal: pub.publications_id.journal,
-            //         url: pub.publications_id.link,
-            //         additional_fields: pub.publications_id.additional_fields?.map((field: any) => ({
-            //             name: field.name,
-            //             value: field.value
-            //         })) || []
-            //     })) || [],
-            //     translations: directusData.translations?.map((trans: any) => ({
-            //         languages_code: trans.languages_code,
-            //         welcome_heading: trans.welcome_heading,
-            //         work_status: trans.work_status,
-            //         summary: trans.introduction_text,
-            //         skills_summary: trans.skills_introduction,
-            //         stages_summary: trans.life_stages_introduction,
-            //         additional_info: trans.additional_info
-            //     })) || []
+            date_created: directusData.date_created,
+            date_updated: directusData.date_updated,
+            image: directusData.cv_image,
+            accumulate_work_experience: directusData.accumulate_work_years,
+            birthdate: directusData.birthdate,
+            work_status_attention: directusData.work_blink,
+            educational_stages: directusData.educational_stages?.map((stage: any) => ({
+                id: stage.id,
+                from: stage.from,
+                to: stage.to,
+                until_today: stage.until_today,
+                date_display: stage.date_display,
+                final_grade: stage.final_grade,
+                translations: stage.translations?.map((trans: any) => ({
+                    languages_code: trans.languages_code,
+                    degree: trans.degree,
+                    institution: trans.institution,
+                    location: trans.location,
+                    final_thesis_title: trans.final_thesis_title,
+                    final_thesis_grade: trans.final_thesis_grade,
+                    additional_info: trans.additional_info
+                })) || []
+            })) || [],
+            career_stages: directusData.career_stages?.map((stage: any) => ({
+                id: stage.id,
+                from: stage.from,
+                to: stage.to,
+                status: stage.status,
+                until_today: stage.until_today,
+                date_display: stage.date_display,
+                use_in_accumulate_work_experience: stage.use_in_accumulate_work_years,
+                translations: stage.translations?.map((trans: any) => ({
+                    languages_code: trans.languages_code,
+                    position: trans.role,
+                    company: trans.company,
+                    location: trans.location,
+                    additional_info: trans.additional_info,
+                    employment_level: trans.employment_level
+                })) || [],
+            })) || [],
+            skills: directusData.skills?.map((skill: any) => ({
+                id: skill.skills_id.id,
+                sort: skill.skills_id.sort,
+                tags: skill.skills_id.tags.map((tag: any) => ({
+                    id: tag.tags_id.id,
+                    value: tag.tags_id.value,
+                    icon: tag.tags_id.icon,
+                    color: tag.tags_id.color,
+                    sort: tag.tags_id.sort,
+                    translations: tag.tags_id.translations?.map((trans: any) => ({
+                        languages_code: trans.languages_code,
+                        name: trans.name,
+                        skill_level: trans.skill_level
+                    })) || [],
+                })) || [],
+                section: {
+                    id: skill.skills_id.section.section_id,
+                    sort: skill.skills_id.section.sort,
+                    date_created: skill.skills_id.section.date_created,
+                    date_updated: skill.skills_id.section.date_updated,
+                    translations: skill.skills_id.section.translations?.map((trans: any) => ({
+                        languages_code: trans.languages_code,
+                        heading: trans.heading,
+                    })) || [],
+                },
+                translations: skill.skills_id.translations?.map((trans: any) => ({
+                    languages_code: trans.languages_code,
+                    subsection: trans.subsection
+                })) || []
+            })) || [],
+            publications: directusData.publications?.map((pub: any) => ({
+                title: pub.title,
+                subtitle: pub.subtitle,
+                authors: pub.authors?.map((author: any) => ({
+                    prefix: author.prefix,
+                    first_name: author.first_name,
+                    last_name: author.last_name
+                })) || [],
+                publisher: pub.publisher,
+                identifier: {
+                    type: pub.identifier_type,
+                    value: pub.identifier
+                },
+                location: pub.location,
+                year: pub.year,
+                conference: pub.conference,
+                journal: pub.journal,
+                url: pub.link
+            })) || [],
+            translations: directusData.translations?.map((trans: any) => ({
+                languages_code: trans.languages_code,
+                welcome_heading: trans.welcome_heading,
+                work_status: trans.work_status,
+                summary: trans.introduction_text,
+                skills_summary: trans.skills_introduction,
+                stages_summary: trans.life_stages_introduction,
+                additional_info: trans.additional_info
+            })) || []
         }
     }
 
     async getCVData(): Promise<CV> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('<your cv endpoint>', {
+            const directusData = await (this.directus as any).request((readItems as any)('CV', {
                 fields: [
                     '*',
                     'translations.*',
+                    'career_stages.*',
+                    'career_stages.translations.*',
+                    'publications.*',
+                    'publications.authors.*',
+                    'educational_stages.*',
+                    'educational_stages.translations.*'
                     // add your queries for relational fields here
                 ]
             }))
@@ -330,24 +331,24 @@ class DirectusAdapter {
             look at shared/types/legal_notice.ts for reference implementation
             ############
             */
-            // status: directusData.status,
-            // full_name: directusData.full_name,
-            // street_and_number: directusData.street_and_number,
-            // zipcode_and_town: directusData.zipcode_and_town,
-            // mail_address: directusData.mail_address,
-            // contact_form_url: directusData.contact_form_url,
-            // translations: directusData.translations?.map((translation: any) => ({
-            //     languages_code: translation.languages_code,
-            //     text: translation.text,
-            //     address_info: translation.address_info,
-            //     country: translation.country,
-            // })) || []
+            status: directusData.status,
+            full_name: directusData.full_name,
+            street_and_number: directusData.street_and_number,
+            zipcode_and_town: directusData.zipcode_and_town,
+            mail_address: directusData.mail_address,
+            contact_form_url: directusData.contact_form_url,
+            translations: directusData.translations?.map((translation: any) => ({
+                languages_code: translation.languages_code,
+                text: translation.text,
+                address_info: translation.address_info,
+                country: translation.country,
+            })) || []
         }
     }
 
     async getLegalNoticeData(): Promise<LegalNotice> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('<your legal notice endpoint>', {
+            const directusData = await (this.directus as any).request((readItems as any)('LegalNotice', {
                 fields: [
                     '*',
                     'translations.*',
