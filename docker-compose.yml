@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   nuxt:
@@ -8,6 +8,6 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     env_file:
-      - .env
+      - stack.env
     restart: unless-stopped
     container_name: punkte3
