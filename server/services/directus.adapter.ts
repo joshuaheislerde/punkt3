@@ -1,13 +1,15 @@
-import { createDirectus, rest, readItems, createItem } from '@directus/sdk'
+import { createDirectus, rest, readItems, createItem, triggerFlow } from '@directus/sdk'
 
 class DirectusAdapter {
     private directus: any
+    private sendMailFlowId: any
 
     constructor() {
         if (!process.env.NUXT_PUBLIC_API_URL) {
             throw new Error('NUXT_PUBLIC_API_URL environment variable is required')
         }
         this.directus = createDirectus<any>(process.env.NUXT_PUBLIC_API_URL).with(rest())
+        this.sendMailFlowId = process.env.SEND_MAIL_FLOW
     }
 
     async getAdapterName() {
@@ -110,7 +112,7 @@ class DirectusAdapter {
 
     async submitContactForm(formData: { name: string; mail: string; text: string }): Promise<void> {
         try {
-            await (this.directus as any).request((createItem as any)('contact_form', formData));
+            await (this.directus as any).request((triggerFlow as any)('POST', this.sendMailFlowId, formData));
         } catch (error) {
             console.error('Error submitting contact form:', error);
             throw error;
