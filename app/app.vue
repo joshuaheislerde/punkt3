@@ -6,6 +6,7 @@ useHead({
 })
 const landingStore = useLandingStore()
 const projectStore = useProjectStore()
+const pubStore = usePublicationStore()
 const designStore = useDesignStore()
 const cvStore = useCvStore()
 const contactStore = useContactStore()
@@ -24,6 +25,10 @@ const { data: cvData } = await useAsyncData('Curriculum_vitae_new', (): Promise<
 
 const { data: projectPosts } = await useAsyncData('projectPosts', (): Promise<Project[]> => {
   return $fetch('/api/projects')
+})
+
+const { data: publications } = await useAsyncData('publications', (): Promise<Publication[]> => {
+  return $fetch('/api/publications')
 })
 
 const { data: contact } = await useAsyncData('contact', (): Promise<Contact> => {
@@ -68,6 +73,9 @@ onMounted((): void => {
   // designStore.initTheme()
   if (!projectStore.projects) {
     projectStore.setProjectsData(projectPosts.value ?? [])
+  }
+  if (!pubStore.publications) {
+    pubStore.setPublicationsData(publications.value ?? [])
   }
   if (!cvStore.cvData && cvData.value) {
     cvStore.setData(cvData.value)

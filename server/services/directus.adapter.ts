@@ -189,6 +189,44 @@ class DirectusAdapter {
         }
     }
 
+    async getPublicationData(): Promise<Publication[]> {
+        try {
+            const directusData = await (this.directus as any).request((readItems as any)('Publication', {
+                fields: [
+                    '*',
+                    'authors.*'
+                ]
+            }))
+            return Array.isArray(directusData) ? directusData.map(item => this.convertToPublication(item)) : []
+        } catch (error) {
+            console.error('Error fetching project data:', error);
+            throw error;
+        }
+    }
+
+    private convertToPublication(directusData: any): Publication {
+        return {
+            title: directusData.title,
+            subtitle: directusData.subtitle,
+            authors: directusData.authors?.map((author: any) => ({
+                prefix: author.prefix,
+                first_name: author.first_name,
+                last_name: author.last_name
+            })) || [],
+            publisher: directusData.publisher,
+            identifier: {
+                type: directusData.identifier_type,
+                value: directusData.identifier
+            },
+            location: directusData.location,
+            year: directusData.year,
+            conference: directusData.conference,
+            journal: directusData.journal,
+            url: directusData.url,
+            file: directusData.file
+        }
+    }
+
     private convertToCV(directusData: any): CV {
         return {
             // Map the fields from Directus data to the CV interface
@@ -269,26 +307,6 @@ class DirectusAdapter {
                     subsection: trans.subsection
                 })) || []
             })) || [],
-            publications: directusData.publications?.map((pub: any) => ({
-                title: pub.title,
-                subtitle: pub.subtitle,
-                authors: pub.authors?.map((author: any) => ({
-                    prefix: author.prefix,
-                    first_name: author.first_name,
-                    last_name: author.last_name
-                })) || [],
-                publisher: pub.publisher,
-                identifier: {
-                    type: pub.identifier_type,
-                    value: pub.identifier
-                },
-                location: pub.location,
-                year: pub.year,
-                conference: pub.conference,
-                journal: pub.journal,
-                url: pub.url,
-                file: pub.file
-            })) || [],
             translations: directusData.translations?.map((trans: any) => ({
                 languages_code: trans.languages_code,
                 welcome_heading: trans.welcome_heading,
@@ -309,8 +327,6 @@ class DirectusAdapter {
                     'translations.*',
                     'career_stages.*',
                     'career_stages.translations.*',
-                    'publications.*',
-                    'publications.authors.*',
                     'educational_stages.*',
                     'educational_stages.translations.*'
                     // add your queries for relational fields here

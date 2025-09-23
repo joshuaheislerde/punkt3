@@ -3,6 +3,7 @@ import type { ComputedRef } from 'vue'
 
 const projectStore = useProjectStore()
 const cvStore = useCvStore()
+const pubStore = usePublicationStore()
 const router = useRouter()
 
 definePageMeta({
@@ -19,13 +20,13 @@ const API_URL: string = config.public.apiURL
 
 </script>
 <template>
-  <div class="flex flex-col gap-0" v-if="cvStore.cvData">
-    <div v-if="cvStore.cvData.publications && cvStore.cvData.publications.length > 0"
+  <div class="flex flex-col gap-0" v-if="pubStore.publications">
+    <div v-if="pubStore.publications && pubStore.publications.length > 0"
       class="p-1 rounded-sm bg-base-100">
       <div class="border-2 border-dotted rounded-sm bg-base-100 border-base-200 post-content">
         <h2 class="p-2 pb-0">{{ tStatic('publications') }}</h2>
         <div class="p-2">
-          <publications-timeline :items="cvStore.cvData.publications" milestone-style="diamond" />
+          <publications-timeline :items="pubStore.publications" milestone-style="diamond" />
         </div>
       </div>
     </div>
