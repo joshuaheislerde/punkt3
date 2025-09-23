@@ -83,7 +83,7 @@ watchEffect(() => {
                             </div>
                             <div v-if="project.tags && project.tags.length"
                                 class="flex flex-wrap gap-2">
-                                <div v-for="tag in project.tags" :key="tag.id">
+                                <div v-for="tag in project.tags" :key="tag.value">
                                     <tag-badge :item="tag" />
                                 </div>
                             </div>

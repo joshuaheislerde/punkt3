@@ -128,59 +128,57 @@ class DirectusAdapter {
             look at shared/types/project.ts for reference implementation
             ############
             */
-            // id: directusData.id,
-            // status: directusData.status,
-            // slug: directusData.slug,
-            // year: directusData.year,
-            // post_image: directusData.post_image,
-            // project_url: directusData.link,
-            // source_code_url: directusData.source_code_link,
-            // date_created: directusData.date_created,
-            // date_updated: directusData.date_updated,
-            // content_blocks: directusData.content_blocks?.map((block: any) => ({
-            //     id: block.content_blocks_id.id,
-            //     show_heading: block.content_blocks_id.show_heading,
-            //     image: block.content_blocks_id.image,
-            //     image_position: block.content_blocks_id.image_position,
-            //     divider_at_bottom: block.content_blocks_id.divider,
-            //     sort: block.content_blocks_id.sort,
-            //     translations: block.content_blocks_id.translations?.map((trans: any) => ({
-            //         languages_code: trans.languages_code,
-            //         heading: trans.heading,
-            //         text: trans.text,
-            //         image_caption: trans.image_caption
-            //     })) || []
+            slug: directusData.slug,
+            year: directusData.year,
+            post_image: directusData.post_image,
+            project_url: directusData.project_url,
+            source_code_url: directusData.source_code_url,
+            content_blocks: directusData.content_blocks?.map((block: any) => ({
+                show_heading: block.show_heading,
+                image: block.image,
+                image_position: block.image_position,
+                divider_at_bottom: block.divider,
+                sort: block.sort,
+                translations: block.translations?.map((trans: any) => ({
+                    languages_code: trans.languages_code,
+                    heading: trans.heading,
+                    text: trans.text,
+                    image_caption: trans.image_caption
+                })) || []
 
-            // })) || [],
-            // tags: directusData.tags?.map((tag: any) => ({
-            //     id: tag.tags_id.id,
-            //     icon: tag.tags_id.icon,
-            //     sort: tag.tags_id.sort,
-            //     color: tag.tags_id.color,
-            //     type: tag.tags_id.type,
-            //     translations: tag.tags_id.translations?.map((trans: any) => ({
-            //         languages_code: trans.languages_code,
-            //         name: trans.name,
-            //         skill_level: trans.skill_level
-            //     })) || []
-            // })) || [],
-            // translations: directusData.translations?.map((translation: any) => ({
-            //     languages_code: translation.languages_code,
-            //     title: translation.title,
-            //     subtitle: translation.subtitle,
-            //     description: translation.description,
-            //     type: translation.type,
-            //     role: translation.role
-            // })) || []
+            })) || [],
+            tags: directusData.tags?.map((tag: any) => ({
+                icon: tag.icon,
+                sort: tag.sort,
+                color: tag.color,
+                type: tag.type,
+                translations: tag.translations?.map((trans: any) => ({
+                    languages_code: trans.languages_code,
+                    name: trans.name,
+                    skill_level: trans.skill_level
+                })) || []
+            })) || [],
+            translations: directusData.translations?.map((translation: any) => ({
+                languages_code: translation.languages_code,
+                title: translation.title,
+                subtitle: translation.subtitle,
+                description: translation.description,
+                type: translation.type,
+                role: translation.role
+            })) || []
         }
     }
 
     async getProjectData(): Promise<Project[]> {
         try {
-            const directusData = await (this.directus as any).request((readItems as any)('Landing', {
+            const directusData = await (this.directus as any).request((readItems as any)('Project', {
                 fields: [
                     '*',
                     'translations.*',
+                    'content_blocks.*',
+                    'content_blocks.translations.*',
+                    'tags.*',
+                    'tags.translations.*'
                     // add your queries for relational fields here
                 ]
             }))
