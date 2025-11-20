@@ -216,7 +216,7 @@ class DirectusAdapter {
             publisher: directusData.publisher,
             identifier: {
                 type: directusData.identifier_type,
-                value: directusData.identifier
+                value: directusData.identifier_value
             },
             location: directusData.location,
             year: directusData.year,
