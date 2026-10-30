@@ -9,8 +9,22 @@ interface WorkPeriod {
 export const useCvStore = defineStore('CV', () => {
   const cvData: Ref<CV | null> = ref(null);
 
+  // most recent first: ongoing stages on top, then by end date, then by start date
+  function byRecency(a: CareerStage | EducationalStage, b: CareerStage | EducationalStage): number {
+    const end = (stage: CareerStage | EducationalStage): number =>
+      stage.until_today || !stage.to ? Infinity : new Date(stage.to).getTime();
+    const start = (stage: CareerStage | EducationalStage): number =>
+      stage.from ? new Date(stage.from).getTime() : 0;
+
+    return (end(b) - end(a)) || (start(b) - start(a));
+  }
+
   function setData(data: CV): void {
-    cvData.value = data;
+    cvData.value = {
+      ...data,
+      career_stages: [...(data.career_stages ?? [])].sort(byRecency),
+      educational_stages: [...(data.educational_stages ?? [])].sort(byRecency),
+    };
   }
 
   function clearStore(): void {
