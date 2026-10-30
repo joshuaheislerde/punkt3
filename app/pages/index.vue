@@ -73,10 +73,10 @@ function handleHtmlClick(e: MouseEvent) {
         <div class="flex flex-col items-center justify-center max-w-5xl">
             <div class="my-11" ref="opening_line">
                 <h1 v-if="currentStageLines.length"
-                    class="flex flex-col max-w-sm gap-4 p-4 text-center rounded-sm sm:max-w-lg bg-base-100">
+                    class="flex flex-col max-w-sm gap-4 p-4 text-center rounded-sm sm:max-w-2xl bg-base-100">
                     <span v-for="line in currentStageLines" :key="line.key" class="flex flex-col">
                         <span class="text-4xl/10 sm:text-5xl/12">{{ line.title }}</span>
-                        <span class="font-sans text-base sm:text-lg text-base-content/70">{{ line.subtitle }}</span>
+                        <span class="font-sans text-xl md:text-2xl text-base-content">{{ line.subtitle }}</span>
                     </span>
                 </h1>
                 <h1 v-else
