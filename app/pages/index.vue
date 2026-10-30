@@ -49,6 +49,14 @@ const currentStageLines = computed((): Array<{ key: string, title: string, subti
     return [...career, ...education].filter(line => line.title)
 })
 
+// With opening_line_mode 'full_name' only the name is shown; otherwise the custom opening line
+const openingLineText = computed((): string => {
+    if (landingData.value?.opening_line_mode === 'full_name' && landingData.value.my_name) {
+        return landingData.value.my_name
+    }
+    return t(landingData.value, 'opening_line')
+})
+
 const htmlLink = ref<HTMLElement | null>(null)
 
 function isInternalLink(href: string): boolean {
@@ -81,7 +89,7 @@ function handleHtmlClick(e: MouseEvent) {
                 </h1>
                 <h1 v-else
                     class="max-w-sm p-4 text-center rounded-sm sm:max-w-lg text-5xl/14 sm:text-7xl/16 bg-base-100">
-                    {{ t(landingData, 'opening_line') }}
+                    {{ openingLineText }}
                 </h1>
             </div>
             <div class="flex flex-col items-center px-10 sm:flex-row sm:gap-3 my-11" ref="about_me">

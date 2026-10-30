@@ -24,6 +24,7 @@ Add a field `opening_line_mode` to the `Landing` collection in Directus (type: s
 
 - `custom` (default): shows the translated `opening_line` text.
 - `current_stages`: lists all ongoing career and educational stages (no end date or "until today") from the CV, e.g. "Software Engineer – at Phoenix Contact". Falls back to `opening_line` if there are none.
+- `full_name`: shows only `my_name` from the `Landing` collection.
 
 ### Sub menus
 
