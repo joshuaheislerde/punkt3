@@ -67,5 +67,10 @@
     "currently": "Currently",
     "profiles": "Profiles",
     "duration_years_short": "{n}y",
-    "duration_months_short": "{n}m"
+    "duration_months_short": "{n}m",
+    "freelance_teaser": "As a freelancer, I offer consulting and development around SAP and AI.",
+    "freelance_cta": "Inquire about consulting",
+    "seo_description": "Joshua Heisler, software engineer and PhD candidate. Freelance consulting and development for SAP (Fiori, RAP, Clean Core, BTP) and AI.",
+    "seo_keywords": "Joshua Heisler, SAP freelancer, SAP consultant, SAP consulting, SAP development, AI consulting, AI in SAP, SAP Fiori, SAP RAP, SAP BTP, Clean Core, ABAP, Germany",
+    "seo_title": "SAP & AI Consulting and Development"
 }

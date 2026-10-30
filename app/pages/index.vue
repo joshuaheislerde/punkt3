@@ -108,6 +108,15 @@ function handleHtmlClick(e: MouseEvent) {
                     </p>
                 </div>
             </div>
+            <!-- freelance offer: one sentence and a link to the contact page -->
+            <div
+                class="flex flex-col items-center gap-3 px-4 py-3 mx-6 text-center rounded-sm sm:flex-row sm:text-left bg-base-100">
+                <p class="text-lg md:text-xl">{{ tStatic('freelance_teaser') }}</p>
+                <NuxtLink :to="localePath('/contact')"
+                    class="px-3 py-1 text-sm font-semibold transition-all border-2 rounded-sm shrink-0 bg-primary text-primary-content border-base-content hover:scale-103 focus:outline-2 focus:outline-primary active:scale-97">
+                    {{ tStatic('freelance_cta') }}
+                </NuxtLink>
+            </div>
             <nav class="relative flex flex-col sm:my-11" ref="menu_items">
                 <div class="grid grid-cols-1 sm:gap-10 sm:grid-cols-2 mt-25 sm:mt-20">
                     <div v-for="item in mainMenuItems" :key="item.slug">

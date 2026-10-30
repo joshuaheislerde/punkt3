@@ -35,6 +35,7 @@ export function useLandingSeo(landing: Ref<Landing | null>) {
   const route = useRoute()
   const api = String(config.public.apiURL || '')
   const languageStore = useLanguageStore()
+  const { tStatic } = useTranslation()
 
   watchEffect(() => {
     const l = landing.value
@@ -51,9 +52,9 @@ export function useLandingSeo(landing: Ref<Landing | null>) {
     const canonical = (config.public.siteUrl ? String(config.public.siteUrl) : site.url)?.replace(/\/$/, '') + route.fullPath
 
     applySeo({
-      title: seo.title || trans.opening_line || site.name,
-      description: seo.meta_description || trans.about_me_short || site.description,
-      keywords: seo.keywords || undefined,
+      title: seo.title || tStatic('seo_title') || site.name,
+      description: seo.meta_description || tStatic('seo_description') || site.description,
+      keywords: seo.keywords || tStatic('seo_keywords') || undefined,
       image: img || undefined,
       noIndex: Boolean(seo.no_index),
       noFollow: Boolean(seo.no_follow),
