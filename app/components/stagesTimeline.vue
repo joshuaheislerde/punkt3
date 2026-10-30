@@ -91,6 +91,72 @@ const parallelStages = computed((): Set<string | number> => {
     .map(stage => stage.id))
 })
 
+// a parent's year ticks are stretched over the parallel stages listed directly below it,
+// so the branch can fork and merge exactly at the years it covers
+const timelineRef = ref<HTMLElement | null>(null)
+const tickSpanHeights = ref(new Map<string | number, number>())
+const branches = ref<Array<{ id: string | number, top: number, height: number }>>([])
+
+const tickGroups = computed((): Map<string | number, string | number> => {
+  const items = props.items ?? []
+  const groups = new Map<string | number, string | number>() // parent id -> last parallel stage id
+  items.forEach((stage, index) => {
+    if (parallelStages.value.has(stage.id)) return
+    let last = index
+    while (items[last + 1] && parallelStages.value.has(items[last + 1]!.id)) last++
+    if (last > index) groups.set(stage.id, items[last]!.id)
+  })
+  return groups
+})
+
+function tickCenter(root: HTMLElement, year: number): number | null {
+  const mark = root.querySelector(`[data-year="${year}"] .year-tick-mark`)
+  if (!mark) return null
+  const rect = mark.getBoundingClientRect()
+  return rect.top + rect.height / 2
+}
+
+async function layoutBranches(): Promise<void> {
+  const root = timelineRef.value
+  if (!root) return
+
+  const heights = new Map<string | number, number>()
+  tickGroups.value.forEach((lastId, parentId) => {
+    const ticks = root.querySelector(`[data-ticks-for="${parentId}"]`)
+    const lastRow = root.querySelector(`[data-row-for="${lastId}"]`)
+    if (!ticks || !lastRow) return
+    heights.set(parentId, Math.max(0, lastRow.getBoundingClientRect().bottom - ticks.getBoundingClientRect().top - 8))
+  })
+  tickSpanHeights.value = heights
+  await nextTick()
+
+  const rootTop = root.getBoundingClientRect().top
+  branches.value = (props.items ?? [])
+    .filter(stage => parallelStages.value.has(stage.id) && stage.from)
+    .flatMap(stage => {
+      const marker = root.querySelector(`[data-row-for="${stage.id}"] .duration-marker`)
+      if (!marker) return []
+      const markerRect = marker.getBoundingClientRect()
+      const endYear = stage.to ? new Date(stage.to).getFullYear() : new Date().getFullYear()
+      const startYear = new Date(stage.from!).getFullYear()
+      // the branch always passes through the stage's own marker
+      const top = Math.min(tickCenter(root, endYear) ?? Infinity, markerRect.top - 10) - rootTop
+      const bottom = Math.max(tickCenter(root, startYear) ?? -Infinity, markerRect.bottom + 10) - rootTop
+      return [{ id: stage.id, top: top - 2, height: bottom - top + 4 }]
+    })
+}
+
+let resizeObserver: ResizeObserver | null = null
+onMounted(() => {
+  nextTick(layoutBranches)
+  if (timelineRef.value && 'ResizeObserver' in window) {
+    resizeObserver = new ResizeObserver(() => layoutBranches())
+    resizeObserver.observe(timelineRef.value)
+  }
+})
+onBeforeUnmount(() => resizeObserver?.disconnect())
+watch(() => props.items, () => nextTick(layoutBranches))
+
 function isOngoing(stage: CareerStage | EducationalStage): boolean {
   return !!stage.until_today || !stage.to
 }
@@ -143,21 +209,24 @@ function handleHtmlClick(e: MouseEvent): void {
   <div v-if="(items && items.length > 0)">
     <h3 v-if="type === 'career'">{{ tStatic('my_career_stages') }}</h3>
     <h3 v-else-if="type === 'educational'">{{ tStatic('my_education_stages') }}</h3>
-    <ol
+    <ol ref="timelineRef"
       class="relative space-y-8 duration-timeline before:absolute before:h-full before:w-1 before:rounded-full before:bg-secondary">
+      <!-- parallel stages: a second line forks off the main line at the stage's end year and merges back at its start year -->
+      <li v-for="branch in branches" :key="`branch-${branch.id}`" class="parallel-branch" aria-hidden="true"
+        :style="{ top: `${branch.top}px`, height: `${branch.height}px` }"></li>
       <li v-for="(stage, stageIndex) in items" :key="stage.id" class="list-none">
-        <div class="relative flex items-stretch gap-2"
+        <div class="relative flex items-stretch gap-2" :data-row-for="stage.id"
           :style="{ '--marker': `${markerSize(stage)}px`, '--ticks': visibleYears.get(stage.id)?.length ?? 0 }">
-          <!-- parallel stages: a second line branches off the main line and merges back -->
-          <span v-if="parallelStages.has(stage.id)" class="parallel-branch" aria-hidden="true"></span>
           <!-- marker on the line (size reflects the duration), below it the covered years along the line -->
           <div class="marker-column" :class="{ 'is-parallel': parallelStages.has(stage.id) }">
             <div class="duration-marker"
               :class="[milestoneStyle === 'square' ? 'rounded-md' : 'rounded-full', isOngoing(stage) ? 'border-dotted' : 'border-solid']">
               <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
             </div>
-            <div class="year-ticks">
-              <span v-for="year in visibleYears.get(stage.id)" :key="year" class="year-tick">
+            <div class="year-ticks" :data-ticks-for="stage.id"
+              :class="{ 'is-stretched': tickSpanHeights.has(stage.id) }"
+              :style="tickSpanHeights.has(stage.id) ? { height: `${tickSpanHeights.get(stage.id)}px` } : {}">
+              <span v-for="year in visibleYears.get(stage.id)" :key="year" class="year-tick" :data-year="year">
                 {{ year }}<span class="year-tick-mark"></span>
               </span>
             </div>
@@ -279,13 +348,18 @@ function handleHtmlClick(e: MouseEvent): void {
   padding-left: var(--branch);
 }
 
-/* forks off the main line above the marker and merges back below the row */
+/* forks off the main line and merges back; top and height come from the measured year ticks */
 .parallel-branch {
-  @apply absolute border-4 border-l-0 pointer-events-none rounded-r-xl border-secondary;
+  @apply absolute list-none border-4 border-l-0 pointer-events-none rounded-r-xl border-secondary;
   left: calc(var(--column) / 2 - 2px);
   width: calc(var(--branch) + 4px);
-  top: -0.875rem;
-  bottom: -0.875rem;
+  margin: 0 !important;
+}
+
+/* a parent's ticks spread over its own row and the parallel rows below it */
+.year-ticks.is-stretched {
+  @apply absolute left-0 justify-between;
+  top: max(40px, calc(var(--marker) * var(--marker-scale)));
 }
 
 /* years sit left of the line below the marker, evenly spaced, each with a small tick touching the line */
