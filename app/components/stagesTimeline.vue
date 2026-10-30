@@ -19,19 +19,39 @@ const { t: $t } = useI18n()
 const router = useRouter()
 const localePath = useLocalePath()
 
-// "3 yrs 2 mos" – the end month counts as a full month (to: 2022-07-01 means until July 2022)
-function duration(stage: CareerStage | EducationalStage): string {
-  if (!stage.from) return ''
+// the end month counts as a full month (to: 2022-07-01 means until July 2022)
+function durationInMonths(stage: CareerStage | EducationalStage): number {
+  if (!stage.from) return 0
   const start = new Date(stage.from)
   const end = stage.to ? new Date(stage.to) : new Date()
-  const months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth() + 1
-  if (months <= 0) return ''
+  return Math.max(0, (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth() + 1)
+}
+
+// ["3 yrs", "2 mos"]
+function durationParts(stage: CareerStage | EducationalStage): string[] {
+  const months = durationInMonths(stage)
   const years = Math.floor(months / 12)
   const rest = months % 12
   return [
     years ? $t('duration_years', years) : '',
     rest ? $t('duration_months', rest) : '',
-  ].filter(Boolean).join(' ')
+  ].filter(Boolean)
+}
+
+// career stages get a circle whose area grows with the duration (diameter ~ sqrt of months)
+const CIRCLE_MIN = 56
+const CIRCLE_MAX = 104
+const maxMonths = computed((): number =>
+  Math.max(1, ...(props.items ?? []).map(stage => durationInMonths(stage)))
+)
+
+function circleSize(stage: CareerStage | EducationalStage): number {
+  const ratio = Math.sqrt(durationInMonths(stage) / maxMonths.value)
+  return Math.round(Math.max(CIRCLE_MIN, CIRCLE_MAX * ratio))
+}
+
+function isOngoing(stage: CareerStage | EducationalStage): boolean {
+  return !!stage.until_today || !stage.to
 }
 
 // grades are maintained as free text, so unify the decimal separator per language
@@ -101,7 +121,12 @@ function handleHtmlClick(e: MouseEvent): void {
             <span class="triangle shrink-0 bg-secondary">
             </span>
           </div>
-          <div class="flex flex-col w-full gap-2 -mt-1">
+          <div class="relative flex flex-col w-full gap-2 -mt-1"
+            :style="type === 'career' ? { '--circle': `${circleSize(stage)}px` } : {}">
+            <div v-if="type === 'career' && durationParts(stage).length" class="duration-circle"
+              :class="isOngoing(stage) ? 'border-dotted' : 'border-solid'">
+              <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
+            </div>
             <div
               class="flex flex-col flex-wrap items-start justify-between gap-2 text-sm font-medium md:flex-row text-secondary-content dark:text-secondary-content-dark">
               <div class="flex">
@@ -132,16 +157,13 @@ function handleHtmlClick(e: MouseEvent): void {
                     year="numeric" :locale="locale"></nuxt-time>
                   <div v-else-if="stage.until_today">{{ tStatic('today') }}</div>
                 </div>
-                <span v-if="type === 'career' && duration(stage)" class="text-sm">
-                  &nbsp;· {{ duration(stage) }}
-                </span>
                 <span v-if="t(stage, 'employment_level') && type === 'career'" class="text-sm">
                   &nbsp;({{ t(stage, 'employment_level') }})
                 </span>
               </div>
               <div>{{ t(stage, 'location') }}</div>
             </div>
-            <div v-if="type === 'career'" class="font-bold text-base-content">
+            <div v-if="type === 'career'" class="font-bold text-base-content circle-gap">
               <p class="text-lg">
                 {{ t(stage, 'position') }}
               </p>
@@ -171,7 +193,8 @@ function handleHtmlClick(e: MouseEvent): void {
                 </div>
               </div>
             </div>
-            <div v-if="t(stage, 'additional_info')" class="relative">
+            <div v-if="t(stage, 'additional_info')" class="relative"
+              :class="{ 'circle-gap': type === 'career' }">
               <div :ref="el => setDescriptionRef(stage.id, el)" v-html="t(stage, 'additional_info')"
                 class="overflow-hidden text-sm stage-description"
                 :class="{ 'collapsed': overflowing.has(stage.id) && !expanded.has(stage.id) }"
@@ -196,6 +219,31 @@ function handleHtmlClick(e: MouseEvent): void {
 </template>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
+/* career duration bubble: sits on the right below date/location; smaller on mobile */
+.duration-circle {
+  @apply absolute right-0 flex flex-col items-center justify-center text-xs font-bold leading-tight text-center border-2 rounded-full top-14 md:top-8 bg-secondary/25 border-secondary text-base-content;
+  width: calc(var(--circle) * 0.75);
+  height: calc(var(--circle) * 0.75);
+}
+
+.circle-gap {
+  padding-right: calc(var(--circle) * 0.75 + 0.75rem);
+}
+
+@media (min-width: 48rem) {
+  .duration-circle {
+    @apply text-sm;
+    width: var(--circle);
+    height: var(--circle);
+  }
+
+  .circle-gap {
+    padding-right: calc(var(--circle) + 1rem);
+  }
+}
+
 .stage-description.collapsed {
   -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
   mask-image: linear-gradient(to bottom, #000 55%, transparent);
