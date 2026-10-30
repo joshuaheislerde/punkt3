@@ -14,6 +14,7 @@ definePageMeta({
 
 const contactStore = useContactStore();
 const { t, tStatic } = useTranslation()
+const { track } = useAnalytics()
 
 const contactFrom = ref<ContactForm>({
   name: '',
@@ -35,6 +36,7 @@ async function sendContactForm(): Promise<void> {
     })
 
     message_send.value = true;
+    track('contact-form-sent');
     contactFrom.value = {
       name: '',
       mail: '',

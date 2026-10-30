@@ -26,6 +26,17 @@ Add a field `opening_line_mode` to the `Landing` collection in Directus (type: s
 - `current_stages`: lists all ongoing career and educational stages (no end date or "until today") from the CV, e.g. "Software Engineer – at Phoenix Contact". Falls back to `opening_line` if there are none.
 - `full_name`: shows only `my_name` from the `Landing` collection.
 
+### Analytics (Umami)
+
+Visitor statistics use [Umami](https://umami.is), which works without cookies. A Portainer/Docker stack for self-hosting is in `deploy/umami/docker-compose.yml`.
+Tracking is only active when these variables are set:
+
+- `NUXT_PUBLIC_UMAMI_HOST`: URL of the Umami instance, e.g. `https://stats.example.com`.
+- `NUXT_PUBLIC_UMAMI_WEBSITE_ID`: website ID from the Umami settings.
+- `NUXT_PUBLIC_UMAMI_DOMAINS` (optional): comma-separated hostnames to track, so local and preview visits are not counted.
+
+Visitors with "Do Not Track" enabled are not counted. Custom events: `consulting-cta`, `about-cta`, `social-link`, `contact-form-sent`, `publication-pdf`, `publication-doi`, `publication-cite`.
+
 ### Sub menus
 
 Submenus in PUNKT3 allow you to add contextual navigation to your pages with the layout `sidebars`, making it easier for users to explore related content. You can configure submenus to display project lists, top-level menus, or custom links, depending on your needs.

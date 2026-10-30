@@ -68,6 +68,10 @@ export default defineNuxtConfig({
     public: {
       apiURL: process.env.NUXT_PUBLIC_API_URL,
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
+      // Umami analytics, see deploy/umami (empty = disabled)
+      umamiHost: process.env.NUXT_PUBLIC_UMAMI_HOST || '',
+      umamiWebsiteId: process.env.NUXT_PUBLIC_UMAMI_WEBSITE_ID || '',
+      umamiDomains: process.env.NUXT_PUBLIC_UMAMI_DOMAINS || '',
     },
   },
   typescript: {

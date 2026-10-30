@@ -13,6 +13,7 @@ const landingStore = useLandingStore();
 const cvStore = useCvStore();
 
 const { t, tMenuItem, tStatic } = useTranslation()
+const { track } = useAnalytics()
 const { landingData } = storeToRefs(landingStore) as { landingData: Ref<Landing | null> }
 
 useLandingSeo(landingData)
@@ -108,7 +109,7 @@ function handleHtmlClick(e: MouseEvent) {
                     </p>
                     <!-- freelance offer: link to the contact page below the intro text -->
                     <div class="mt-2 mb-1">
-                        <NuxtLink :to="localePath('/contact')"
+                        <NuxtLink :to="localePath('/contact')" @click="track('consulting-cta', { source: 'landing' })"
                             class="inline-block px-2 text-sm font-semibold no-underline transition-all border-2 rounded-sm post-content-none md:text-base bg-primary text-primary-content border-base-content hover:scale-103 focus:outline-2 focus:outline-primary active:scale-97">
                             {{ tStatic('freelance_cta') }}
                         </NuxtLink>

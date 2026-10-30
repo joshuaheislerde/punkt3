@@ -17,6 +17,7 @@ const API_URL: string = config.public.apiURL
 const landingStore = useLandingStore()
 const { tStatic } = useTranslation()
 const { initials, fullTitle, toIeee, toBibtex } = useCitation()
+const { track } = useAnalytics()
 
 // items are already sorted (newest first), so grouping keeps that order
 const groupedByYear = computed((): Array<{ year: string, publications: Publication[] }> => {
@@ -37,9 +38,10 @@ function isMe(author: Author): boolean {
 
 // shows a short "copied" hint on the button that was used
 const copiedKey = ref<string | null>(null)
-async function copy(text: string, key: string): Promise<void> {
+async function copy(text: string, key: string, pub: Publication, format: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text)
+    track('publication-cite', { format, title: fullTitle(pub) })
     copiedKey.value = key
     setTimeout(() => { if (copiedKey.value === key) copiedKey.value = null }, 2000)
   } catch (error) {
@@ -86,7 +88,8 @@ async function copy(text: string, key: string): Promise<void> {
             <span class="italic text-base-content/80">{{ pub.journal || pub.conference }}</span><span
               v-if="pub.location" class="text-base-content/80">, {{ pub.location }}</span><span>. </span>
             <span v-if="pub.identifier?.type === 'DOI' && pub.identifier.value" class="whitespace-nowrap">
-              <a :href="`https://doi.org/${pub.identifier.value}`" target="_blank" rel="noopener">{{
+              <a :href="`https://doi.org/${pub.identifier.value}`" target="_blank" rel="noopener"
+                @click="track('publication-doi', { title: fullTitle(pub) })">{{
                 pub.identifier.value }}</a>
             </span>
             <span v-else-if="pub.identifier?.value" class="whitespace-nowrap">
@@ -97,11 +100,12 @@ async function copy(text: string, key: string): Promise<void> {
             </span>
             <span class="inline-flex flex-wrap gap-1 ml-3 align-middle">
               <a v-if="pub.file" :href="`${API_URL}/assets/${pub.file}`" target="_blank" rel="noopener"
-                class="post-content-none pub-action">{{ tStatic('publication_pdf') }}</a>
-              <button type="button" class="pub-action" @click="copy(toIeee(pub), `ieee-${pub.id}`)">
+                class="post-content-none pub-action" @click="track('publication-pdf', { title: fullTitle(pub) })">{{
+                  tStatic('publication_pdf') }}</a>
+              <button type="button" class="pub-action" @click="copy(toIeee(pub), `ieee-${pub.id}`, pub, 'ieee')">
                 {{ copiedKey === `ieee-${pub.id}` ? tStatic('publication_copied') : tStatic('publication_cite') }}
               </button>
-              <button type="button" class="pub-action" @click="copy(toBibtex(pub), `bib-${pub.id}`)">
+              <button type="button" class="pub-action" @click="copy(toBibtex(pub), `bib-${pub.id}`, pub, 'bibtex')">
                 {{ copiedKey === `bib-${pub.id}` ? tStatic('publication_copied') : tStatic('publication_bibtex') }}
               </button>
             </span>

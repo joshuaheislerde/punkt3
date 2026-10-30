@@ -14,6 +14,7 @@ const contactStore = useContactStore();
 const localePath = useLocalePath()
 
 const { t, tStatic } = useTranslation()
+const { track } = useAnalytics()
 
 // e.g. "Software Engineer @ Phoenix Contact"
 const currentStages = computed<string[]>(() => [
@@ -61,6 +62,7 @@ const cvImage = computed<string | null>(() => {
             <div class="flex flex-wrap gap-2 mt-1 md:mt-0">
               <a v-for="social in contactStore.contactData.socials" :key="social.id" :href="social.link"
                 target="_blank" rel="noopener noreferrer" :title="social.name" :aria-label="social.name"
+                @click="track('social-link', { name: social.name, source: 'about-me' })"
                 class="post-content-none transition-transform hover:scale-110 focus:scale-110">
                 <NuxtImg v-if="social.icon" :src="`${API_URL}/assets/${social.icon}`" :alt="social.name"
                   class="object-contain p-0.5 bg-white rounded-full size-7 outline-2 outline-base-content" />
@@ -142,13 +144,16 @@ const cvImage = computed<string | null>(() => {
         class="flex flex-col items-center gap-3 p-4 text-center border-2 border-dotted rounded-sm bg-base-100 border-base-200">
         <p class="font-medium">{{ tStatic('about_cta') }}</p>
         <div class="flex flex-wrap justify-center gap-2">
-          <NuxtLink :to="localePath('/contact')" class="post-content-none cta-action cta-primary">
+          <NuxtLink :to="localePath('/contact')" class="post-content-none cta-action cta-primary"
+            @click="track('about-cta', { target: 'contact' })">
             {{ tStatic('about_cta_contact') }}
           </NuxtLink>
-          <NuxtLink :to="localePath('/publications')" class="post-content-none cta-action">
+          <NuxtLink :to="localePath('/publications')" class="post-content-none cta-action"
+            @click="track('about-cta', { target: 'publications' })">
             {{ tStatic('about_cta_publications') }}
           </NuxtLink>
-          <NuxtLink :to="localePath('/portfolio')" class="post-content-none cta-action">
+          <NuxtLink :to="localePath('/portfolio')" class="post-content-none cta-action"
+            @click="track('about-cta', { target: 'projects' })">
             {{ tStatic('about_cta_projects') }}
           </NuxtLink>
         </div>
