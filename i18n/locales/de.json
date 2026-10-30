@@ -35,7 +35,7 @@
     "today": "Heute",
     "responsibilities": "Verantwortlichkeiten",
     "final_grade": "Abschlussnote",
-    "my_education_stages": "Ausbildung und akademischer Werdegang",
+    "my_education_stages": "Ausbildung",
     "final_thesis": "Abschlussthesis",
     "grading": "Benotung",
     "publications": "Publikationen",
@@ -57,5 +57,15 @@
     "publication_pdf": "PDF",
     "publication_cite": "Zitieren (IEEE)",
     "publication_bibtex": "BibTeX",
-    "publication_copied": "Kopiert!"
+    "publication_copied": "Kopiert!",
+    "duration_years": "{n} J. | {n} J.",
+    "duration_months": "{n} Mon. | {n} Mon.",
+    "show_more": "Mehr anzeigen",
+    "show_less": "Weniger anzeigen",
+    "about_cta": "Interesse an einer Zusammenarbeit oder einem fachlichen Austausch?",
+    "about_cta_contact": "Kontakt aufnehmen",
+    "about_cta_publications": "Publikationen ansehen",
+    "about_cta_projects": "Projekte ansehen",
+    "currently": "Aktuell",
+    "profiles": "Profile"
 }

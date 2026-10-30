@@ -10,17 +10,16 @@ definePageMeta({
   hasSubMenu: false,
 })
 
+const contactStore = useContactStore();
+const localePath = useLocalePath()
+
 const { t, tStatic } = useTranslation()
 
-const age = computed<number | null>(() => {
-  if (!cvStore.cvData?.birthdate) return null
-  const birth = new Date(cvStore.cvData.birthdate)
-  const today = new Date()
-  let years = today.getFullYear() - birth.getFullYear()
-  const m = today.getMonth() - birth.getMonth()
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) years--
-  return years
-})
+// e.g. "Software Engineer @ Phoenix Contact"
+const currentStages = computed<string[]>(() => [
+  ...cvStore.currentCareerStages.map(stage => `${t(stage, 'position')} @ ${t(stage, 'company')}`),
+  ...cvStore.currentEducationalStages.map(stage => `${t(stage, 'degree')} @ ${t(stage, 'institution')}`),
+])
 
 const cvImage = computed<string | null>(() => {
   return cvStore.cvData?.image || landingStore.landingData?.image || null
@@ -34,13 +33,15 @@ const cvImage = computed<string | null>(() => {
         <div
           class="flex flex-col w-fit *:flex *:flex-row *:items-center *:p-2 *:justify-start text-secondary-content dark:text-secondary-content-dark font-medium">
           <h2>{{ t(cvStore.cvData, 'welcome_heading') }}</h2>
-          <div>
-            <div class="basis-32 shrink-0">{{ tStatic('age') }}</div>
-            <div class="basis-4 shrink-0">
+          <div v-if="currentStages.length" class="!items-start">
+            <div class="basis-32 shrink-0">{{ tStatic('currently') }}</div>
+            <div class="pt-1.5 basis-4 shrink-0">
               <div class="single-dot-secondary">
               </div>
             </div>
-            <div class="font-bold">{{ age }} {{ tStatic('years') }}</div>
+            <div class="flex flex-col font-bold">
+              <span v-for="line in currentStages" :key="line">{{ line }}</span>
+            </div>
           </div>
           <div>
             <div class="basis-32 shrink-0">{{ tStatic('work_experience') }}</div>
@@ -51,7 +52,23 @@ const cvImage = computed<string | null>(() => {
             <div class="font-bold">{{ cvStore.workExperienceYears }}+ {{
               tStatic('years_in_field') }}</div>
           </div>
-          <div>
+          <div v-if="contactStore.contactData?.socials?.length">
+            <div class="basis-32 shrink-0">{{ tStatic('profiles') }}</div>
+            <div class="basis-4 shrink-0">
+              <div class="single-dot-secondary">
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <a v-for="social in contactStore.contactData.socials" :key="social.id" :href="social.link"
+                target="_blank" rel="noopener noreferrer" :title="social.name" :aria-label="social.name"
+                class="post-content-none transition-transform hover:scale-110 focus:scale-110">
+                <NuxtImg v-if="social.icon" :src="`${API_URL}/assets/${social.icon}`" :alt="social.name"
+                  class="object-contain p-0.5 bg-white rounded-full size-7 outline-2 outline-base-content" />
+                <span v-else class="text-sm underline">{{ social.name }}</span>
+              </a>
+            </div>
+          </div>
+          <div v-if="t(cvStore.cvData, 'work_status')">
             <div class="relative basis-32 shrink-0" v-if="cvStore.cvData.work_status_attention" >
               <div class="relative">{{ tStatic('career_status') }}</div>
             </div>
@@ -120,6 +137,23 @@ const cvImage = computed<string | null>(() => {
       <div class="h-fit mx-auto my-0 max-w-1/2 dots-border-top !border-base-300">
       </div>
     </div>
+    <div class="p-1 rounded-sm bg-base-100">
+      <div
+        class="flex flex-col items-center gap-3 p-4 text-center border-2 border-dotted rounded-sm bg-base-100 border-base-200">
+        <p class="font-medium">{{ tStatic('about_cta') }}</p>
+        <div class="flex flex-wrap justify-center gap-2">
+          <NuxtLink :to="localePath('/contact')" class="post-content-none cta-action cta-primary">
+            {{ tStatic('about_cta_contact') }}
+          </NuxtLink>
+          <NuxtLink :to="localePath('/publications')" class="post-content-none cta-action">
+            {{ tStatic('about_cta_publications') }}
+          </NuxtLink>
+          <NuxtLink :to="localePath('/portfolio')" class="post-content-none cta-action">
+            {{ tStatic('about_cta_projects') }}
+          </NuxtLink>
+        </div>
+      </div>
+    </div>
     <!--<div v-if="cvStore.cvData.publications && cvStore.cvData.publications.length > 0"
       class="p-1 rounded-sm bg-base-100">
       <div class="border-2 border-dotted rounded-sm bg-base-100 border-base-200 post-content">
@@ -132,6 +166,16 @@ const cvImage = computed<string | null>(() => {
   </div>
 </template>
 <style scoped>
+@reference "~/assets/css/main.css";
+
+.cta-action {
+  @apply px-3 py-1 text-sm font-semibold transition-all border-2 rounded-sm bg-accent text-accent-content border-base-content hover:bg-primary hover:text-primary-content focus:outline-2 focus:outline-primary active:scale-97;
+}
+
+.cta-primary {
+  @apply bg-primary text-primary-content;
+}
+
 :deep(.custom-content-list li),
 :deep(.custom-content-list ol),
 :deep(.custom-content-list ul) {

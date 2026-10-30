@@ -14,6 +14,68 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   milestoneStyle: 'circle'
 })
+
+const { t: $t } = useI18n()
+const router = useRouter()
+const localePath = useLocalePath()
+
+// "3 yrs 2 mos" – the end month counts as a full month (to: 2022-07-01 means until July 2022)
+function duration(stage: CareerStage | EducationalStage): string {
+  if (!stage.from) return ''
+  const start = new Date(stage.from)
+  const end = stage.to ? new Date(stage.to) : new Date()
+  const months = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth() + 1
+  if (months <= 0) return ''
+  const years = Math.floor(months / 12)
+  const rest = months % 12
+  return [
+    years ? $t('duration_years', years) : '',
+    rest ? $t('duration_months', rest) : '',
+  ].filter(Boolean).join(' ')
+}
+
+// grades are maintained as free text, so unify the decimal separator per language
+function formatGrade(value: string): string {
+  return locale.value.startsWith('de') ? value.replace('.', ',') : value.replace(',', '.')
+}
+
+// long descriptions are collapsed; the toggle is only shown if the text actually overflows
+const COLLAPSED_HEIGHT = 72
+const descriptionRefs = new Map<string | number, HTMLElement>()
+const overflowing = ref(new Set<string | number>())
+const expanded = ref(new Set<string | number>())
+
+function setDescriptionRef(id: string | number, el: unknown): void {
+  if (el instanceof HTMLElement) descriptionRefs.set(id, el)
+  else descriptionRefs.delete(id)
+}
+
+function measureDescriptions(): void {
+  const next = new Set<string | number>()
+  descriptionRefs.forEach((el, id) => {
+    if (el.scrollHeight > COLLAPSED_HEIGHT + 8) next.add(id)
+  })
+  overflowing.value = next
+}
+
+function toggleDescription(id: string | number): void {
+  const next = new Set(expanded.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  expanded.value = next
+}
+
+onMounted(() => nextTick(measureDescriptions))
+watch(locale, () => nextTick(measureDescriptions))
+
+// internal links from WYSIWYG content (e.g. "/publications") use SPA navigation
+function handleHtmlClick(e: MouseEvent): void {
+  const link = (e.target as HTMLElement | null)?.closest('a')
+  const href = (link?.getAttribute('href') || '').trim()
+  if (!href.startsWith('/') || href.startsWith('//')) return
+  e.preventDefault()
+  router.push(localePath(href))
+}
 </script>
 
 <template>
@@ -70,6 +132,9 @@ const props = withDefaults(defineProps<Props>(), {
                     year="numeric" :locale="locale"></nuxt-time>
                   <div v-else-if="stage.until_today">{{ tStatic('today') }}</div>
                 </div>
+                <span v-if="type === 'career' && duration(stage)" class="text-sm">
+                  &nbsp;· {{ duration(stage) }}
+                </span>
                 <span v-if="t(stage, 'employment_level') && type === 'career'" class="text-sm">
                   &nbsp;({{ t(stage, 'employment_level') }})
                 </span>
@@ -98,18 +163,27 @@ const props = withDefaults(defineProps<Props>(), {
                   <div v-if="t(stage, 'final_thesis_title')" class="font-medium">{{
                     tStatic('final_thesis') }}:</div>
                   <div>{{ t(stage, 'final_thesis_title') }}</div>
-                  <div v-if="t(stage, 'final_thesis_grade')">({{ tStatic('grading') }}: {{
-                    t(stage, 'final_thesis_grade')
-                    }})
+                  <div v-if="t(stage, 'final_thesis_grade')">({{ tStatic('grading') }}: {{ formatGrade(t(stage, 'final_thesis_grade')) }})
                   </div>
                 </div>
                 <div v-if="t(stage, 'final_grade')" class="font-medium ">
-                  {{ tStatic('final_grade') }}: {{ t(stage, 'final_grade') }}
+                  {{ tStatic('final_grade') }}: {{ formatGrade(t(stage, 'final_grade')) }}
                 </div>
               </div>
             </div>
-            <p v-html="t(stage, 'additional_info')" class="text-sm">
-            </p>
+            <div v-if="t(stage, 'additional_info')" class="relative">
+              <div :ref="el => setDescriptionRef(stage.id, el)" v-html="t(stage, 'additional_info')"
+                class="overflow-hidden text-sm stage-description"
+                :class="{ 'collapsed': overflowing.has(stage.id) && !expanded.has(stage.id) }"
+                :style="overflowing.has(stage.id) && !expanded.has(stage.id) ? { maxHeight: `${COLLAPSED_HEIGHT}px` } : {}"
+                @click="handleHtmlClick">
+              </div>
+              <button v-if="overflowing.has(stage.id)" type="button"
+                class="mt-1 text-sm font-semibold cursor-pointer text-secondary-content dark:text-secondary-content-dark hover:underline"
+                @click="toggleDescription(stage.id)">
+                {{ expanded.has(stage.id) ? tStatic('show_less') : tStatic('show_more') }}
+              </button>
+            </div>
           </div>
         </div>
         <div v-if="items[stageIndex + 1]" class="pl-4 divider">
@@ -122,6 +196,27 @@ const props = withDefaults(defineProps<Props>(), {
 </template>
 
 <style scoped>
+.stage-description.collapsed {
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+.stage-description :deep(ul) {
+  margin: 0.25rem 0 0 0 !important;
+}
+
+.stage-description :deep(li) {
+  margin: 0.125rem 0 !important;
+}
+
+.stage-description :deep(small) {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  opacity: 0.75;
+}
+
 .triangle {
   --r: 0.2rem;
   width: 1.55rem;
