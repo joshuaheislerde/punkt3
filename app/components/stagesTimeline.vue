@@ -54,6 +54,18 @@ function stageYears(stage: CareerStage | EducationalStage): number[] {
   return Array.from({ length: Math.max(1, end - start + 1) }, (_, i) => end - i)
 }
 
+// each year is labelled only once, at the topmost stage that covers it
+const visibleYears = computed((): Map<string | number, number[]> => {
+  const shown = new Set<number>()
+  const result = new Map<string | number, number[]>()
+  for (const stage of props.items ?? []) {
+    const years = stageYears(stage).filter(year => !shown.has(year))
+    years.forEach(year => shown.add(year))
+    result.set(stage.id, years)
+  }
+  return result
+})
+
 function isOngoing(stage: CareerStage | EducationalStage): boolean {
   return !!stage.until_today || !stage.to
 }
@@ -110,7 +122,7 @@ function handleHtmlClick(e: MouseEvent): void {
       class="relative space-y-8 duration-timeline before:absolute before:h-full before:w-1 before:rounded-full before:bg-secondary">
       <li v-for="(stage, stageIndex) in items" :key="stage.id" class="list-none">
         <div class="relative flex items-stretch gap-2"
-          :style="{ '--marker': `${markerSize(stage)}px`, '--ticks': stageYears(stage).length }">
+          :style="{ '--marker': `${markerSize(stage)}px`, '--ticks': visibleYears.get(stage.id)?.length ?? 0 }">
           <!-- marker on the line (size reflects the duration), below it the covered years along the line -->
           <div class="marker-column">
             <div class="duration-marker"
@@ -118,7 +130,9 @@ function handleHtmlClick(e: MouseEvent): void {
               <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
             </div>
             <div class="year-ticks">
-              <span v-for="year in stageYears(stage)" :key="year">{{ year }}</span>
+              <span v-for="year in visibleYears.get(stage.id)" :key="year" class="year-tick">
+                {{ year }}<span class="year-tick-mark"></span>
+              </span>
             </div>
           </div>
           <div class="relative flex flex-col w-full gap-2 -mt-1 marker-min-height">
@@ -231,11 +245,19 @@ function handleHtmlClick(e: MouseEvent): void {
   width: var(--column);
 }
 
-/* years sit left of the line, spread from below the marker down to the end of the stage */
+/* years sit left of the line below the marker, evenly spaced, each with a small tick touching the line */
 .year-ticks {
-  @apply flex flex-col justify-between flex-1 w-full pt-1 font-semibold leading-none text-right text-secondary-content dark:text-secondary-content-dark;
-  padding-right: calc(50% + 5px);
+  @apply flex flex-col w-full pt-1 font-semibold leading-none text-secondary-content dark:text-secondary-content-dark;
+  padding-right: calc(50% + 2px);
   font-size: 0.5625rem;
+}
+
+.year-tick {
+  @apply flex items-center justify-end h-5 gap-0.5;
+}
+
+.year-tick-mark {
+  @apply w-1.5 h-0.5 rounded-full bg-secondary;
 }
 
 .duration-marker {
