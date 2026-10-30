@@ -5,12 +5,8 @@ const { locale } = useI18n()
 interface Props {
   type: 'career' | 'educational' | 'publication'
   items: (CareerStage | EducationalStage)[] | [] | null
-  milestoneStyle?: 'square' | 'circle' | 'diamond' | 'triangle'
+  milestoneStyle?: 'square' | 'circle' // shape of the duration markers on the line
 }
-/*  Attention!:
-* 'triangle' is an experimantal feature and it is just ok in firefox based browsers
-* I don't know about Safari
-*/
 const props = withDefaults(defineProps<Props>(), {
   milestoneStyle: 'circle'
 })
@@ -38,16 +34,20 @@ function durationParts(stage: CareerStage | EducationalStage): string[] {
   ].filter(Boolean)
 }
 
-// career stages get a circle whose area grows with the duration (diameter ~ sqrt of months)
-const CIRCLE_MIN = 44
-const CIRCLE_MAX = 64
+// each stage gets a marker whose area grows with the duration (size ~ sqrt of months)
+const MARKER_MIN = 44
+const MARKER_MAX = 64
 const maxMonths = computed((): number =>
   Math.max(1, ...(props.items ?? []).map(stage => durationInMonths(stage)))
 )
 
-function circleSize(stage: CareerStage | EducationalStage): number {
+function markerSize(stage: CareerStage | EducationalStage): number {
   const ratio = Math.sqrt(durationInMonths(stage) / maxMonths.value)
-  return Math.round(Math.max(CIRCLE_MIN, CIRCLE_MAX * ratio))
+  return Math.round(Math.max(MARKER_MIN, MARKER_MAX * ratio))
+}
+
+function startYear(stage: CareerStage | EducationalStage): string {
+  return stage.from ? String(new Date(stage.from).getFullYear()) : ''
 }
 
 function isOngoing(stage: CareerStage | EducationalStage): boolean {
@@ -102,33 +102,21 @@ function handleHtmlClick(e: MouseEvent): void {
   <div v-if="(items && items.length > 0)">
     <h3 v-if="type === 'career'">{{ tStatic('my_career_stages') }}</h3>
     <h3 v-else-if="type === 'educational'">{{ tStatic('my_education_stages') }}</h3>
-    <ol :class="{ 'career-timeline': type === 'career' }"
-      class="relative !pl-1 md:!pl-3 space-y-8 before:absolute before:-ml-px before:h-full before:w-1 before:rounded-full before:bg-secondary">
+    <ol
+      class="relative space-y-8 duration-timeline before:absolute before:h-full before:w-1 before:rounded-full before:bg-secondary">
       <li v-for="(stage, stageIndex) in items" :key="stage.id" class="list-none">
-        <div class="relative flex items-start gap-2"
-          :style="type === 'career' ? { '--circle': `${circleSize(stage)}px` } : {}">
-          <!-- career stages: the milestone is a circle whose size reflects the duration -->
-          <div v-if="type === 'career'" class="duration-column">
-            <div class="duration-circle" :class="isOngoing(stage) ? 'border-dotted' : 'border-solid'">
-              <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
+        <div class="relative flex items-start gap-2" :style="{ '--marker': `${markerSize(stage)}px` }">
+          <!-- start year left of the line, marker on the line; its size reflects the duration -->
+          <div class="timeline-marker">
+            <span class="timeline-year">{{ startYear(stage) }}</span>
+            <div class="marker-column">
+              <div class="duration-marker"
+                :class="[milestoneStyle === 'square' ? 'rounded-md' : 'rounded-full', isOngoing(stage) ? 'border-dotted' : 'border-solid']">
+                <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
+              </div>
             </div>
           </div>
-          <span v-else-if="milestoneStyle === 'circle'"
-            class="-mt-1 rounded-full bg-secondary size-5 shrink-0 ring-2 ring-base-100  -ml-2.25">
-          </span>
-          <span v-else-if="milestoneStyle === 'square'"
-            class="-mt-1 rounded-sm bg-secondary size-4.5 shrink-0 ring-2 ring-base-100  -ml-2">
-          </span>
-          <span v-else-if="milestoneStyle === 'diamond'"
-            class="-mt-1 rotate-45 rounded-sm bg-secondary size-4.5 shrink-0 ring-2 ring-base-100 ml-0.25">
-          </span>
-          <div v-else-if="milestoneStyle === 'triangle'"
-            class="relative flex items-center justify-center -mt-1 -ml-[2.25px]">
-            <span class="triangle-ring absolute -mt-0.5"></span>
-            <span class="triangle shrink-0 bg-secondary">
-            </span>
-          </div>
-          <div class="relative flex flex-col w-full gap-2 -mt-1" :class="{ 'circle-min-height': type === 'career' }">
+          <div class="relative flex flex-col w-full gap-2 -mt-1 marker-min-height">
             <div
               class="flex flex-col flex-wrap items-start justify-between gap-2 text-sm font-medium md:flex-row text-secondary-content dark:text-secondary-content-dark">
               <div class="flex">
@@ -222,42 +210,57 @@ function handleHtmlClick(e: MouseEvent): void {
 <style scoped>
 @reference "~/assets/css/main.css";
 
-/* career timeline: the line runs through the centre of the duration circles; smaller on mobile */
-.career-timeline {
+/* timeline: start years on the left, the line runs through the centre of the duration markers; smaller on mobile */
+.duration-timeline {
+  --years: 2rem;
   --column: 56px;
-  --circle-scale: 0.85;
+  --marker-scale: 0.85;
   padding-left: 0 !important;
 }
 
-.career-timeline::before {
-  left: calc(var(--column) / 2 - 2px);
-  margin-left: 0;
+.duration-timeline::before {
+  left: calc(var(--years) + var(--column) / 2 - 2px);
 }
 
-.duration-column {
-  @apply flex justify-center -mt-1 shrink-0;
+.timeline-marker {
+  @apply flex items-center -mt-1 shrink-0;
+}
+
+.timeline-year {
+  @apply pr-1 font-semibold text-right text-secondary-content dark:text-secondary-content-dark;
+  width: var(--years);
+  font-size: 0.625rem;
+}
+
+.marker-column {
+  @apply flex justify-center;
   width: var(--column);
 }
 
-.duration-circle {
-  @apply flex flex-row items-center justify-center gap-0.5 font-bold whitespace-nowrap leading-tight text-center border-2 rounded-full ring-4 ring-base-100 border-secondary text-base-content;
-  width: max(40px, calc(var(--circle) * var(--circle-scale)));
-  height: max(40px, calc(var(--circle) * var(--circle-scale)));
+.duration-marker {
+  @apply flex flex-row items-center justify-center gap-0.5 font-bold whitespace-nowrap leading-tight text-center border-2 ring-4 ring-base-100 border-secondary text-base-content;
+  width: max(40px, calc(var(--marker) * var(--marker-scale)));
+  height: max(40px, calc(var(--marker) * var(--marker-scale)));
   font-size: 0.625rem;
   background: color-mix(in oklab, var(--color-secondary) 25%, var(--color-base-100));
 }
 
-.circle-min-height {
-  min-height: max(40px, calc(var(--circle) * var(--circle-scale)));
+.marker-min-height {
+  min-height: max(40px, calc(var(--marker) * var(--marker-scale)));
 }
 
 @media (min-width: 48rem) {
-  .career-timeline {
+  .duration-timeline {
+    --years: 2.5rem;
     --column: 64px;
-    --circle-scale: 1;
+    --marker-scale: 1;
   }
 
-  .duration-circle {
+  .timeline-year {
+    @apply text-xs;
+  }
+
+  .duration-marker {
     font-size: 0.6875rem;
   }
 }
@@ -281,33 +284,5 @@ function handleHtmlClick(e: MouseEvent): void {
   font-size: 0.75rem;
   line-height: 1rem;
   opacity: 0.75;
-}
-
-.triangle {
-  --r: 0.2rem;
-  width: 1.55rem;
-  aspect-ratio: 1/cos(30deg);
-  --_g: calc(tan(60deg)*var(--r)) bottom var(--r), #000 98%, #0000 101%;
-  -webkit-mask:
-    conic-gradient(from -30deg at 50% calc(200% - 3*var(--r)/2), #000 60deg, #0000 0) 0 100%/100% calc(100% - 3*var(--r)/2) no-repeat,
-    radial-gradient(var(--r) at 50% calc(2*var(--r)), #000 98%, #0000 101%),
-    radial-gradient(var(--r) at left var(--_g)),
-    radial-gradient(var(--r) at right var(--_g));
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  background: var(--color-secondary);
-}
-
-.triangle-ring {
-  --r: 0.3rem;
-  width: calc(1.55rem + 8px);
-  aspect-ratio: 1/cos(30deg);
-  --_g: calc(tan(60deg)*var(--r)) bottom var(--r), #000 98%, #0000 101%;
-  -webkit-mask:
-    conic-gradient(from -30deg at 50% calc(200% - 3*var(--r)/2), #000 60deg, #0000 0) 0 100%/100% calc(100% - 3*var(--r)/2) no-repeat,
-    radial-gradient(var(--r) at 50% calc(2*var(--r)), #000 98%, #0000 101%),
-    radial-gradient(var(--r) at left var(--_g)),
-    radial-gradient(var(--r) at right var(--_g));
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  background: var(--color-base-100);
 }
 </style>
