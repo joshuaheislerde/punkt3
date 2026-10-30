@@ -1,12 +1,4 @@
 <script setup lang="ts">
-interface GroupedSkillSubsection {
-  subsection: string
-  tags: Tag[]
-}
-interface GroupedSkillSection {
-  section: Section
-  subsections: GroupedSkillSubsection[]
-}
 const landingStore = useLandingStore();
 const cvStore = useCvStore();
 const config = useRuntimeConfig()
@@ -33,47 +25,6 @@ const age = computed<number | null>(() => {
 const cvImage = computed<string | null>(() => {
   return cvStore.cvData?.image || landingStore.landingData?.image || null
 })
-
-
-const groupedSkills = computed<GroupedSkillSection[]>(() => {
-  if (!cvStore.cvData?.skills) return []
-
-  const sections = new Map<
-    string,
-    {
-      section: Section
-      subsections: Map<string, GroupedSkillSubsection>
-    }
-  >()
-
-  cvStore.cvData.skills.forEach(skill => {
-    const sectionId = skill.section.id
-    if (!sections.has(sectionId)) {
-      sections.set(sectionId, {
-        section: skill.section,
-        subsections: new Map()
-      })
-    }
-    const section = sections.get(sectionId)!
-    const subsectionName = t(skill, 'subsection') || ''
-    if (!section.subsections.has(subsectionName)) {
-      section.subsections.set(subsectionName, {
-        subsection: subsectionName,
-        tags: []
-      })
-    }
-    if (skill.tags?.length) {
-      section.subsections.get(subsectionName)!.tags.push(...skill.tags)
-    }
-  })
-
-  return Array.from(sections.values()).map(s => ({
-    section: s.section,
-    subsections: Array.from(s.subsections.values())
-  }))
-})
-
-
 </script>
 <template>
   <div v-if="cvStore.cvData" class="flex flex-col w-full gap-3 post-content">
@@ -142,41 +93,6 @@ const groupedSkills = computed<GroupedSkillSection[]>(() => {
       <div class="border-2 border-dotted rounded-sm bg-base-100 border-base-200">
         <h2 class="p-2 pb-0">{{ tStatic('about_me') }}</h2>
         <div class="p-2" v-html="t(cvStore.cvData, 'summary')"></div>
-      </div>
-    </div>
-    <div class="divider">
-      <div class="h-fit mx-auto my-0 max-w-1/2 dots-border-top !border-base-300">
-      </div>
-    </div>
-    <div class="p-1 rounded-sm bg-base-100">
-      <div class="border-2 border-dotted rounded-sm bg-base-100 border-base-200">
-        <h2 class="p-2 pb-0">{{ tStatic('my_skills') }}</h2>
-        <div class="flex flex-col gap-6 p-2">
-          <div v-html="t(cvStore.cvData, 'skills_summary')">
-          </div>
-          <div v-if="cvStore.cvData.skills.length > 0" class="flex flex-col gap-4">
-            <div v-for="(sectionGroup, index) in groupedSkills" :key="sectionGroup.section.id"
-              class="flex flex-col gap-4">
-              <div v-if="index > 0" class="divider">
-                <div class="w-1/2 mx-auto my-0 border-t-4 border-dotted h-fit border-base-200">
-                </div>
-              </div>
-              <div class="flex flex-row items-center gap-2">
-                <h3 class="!mb-0 w-fit shrink-0">{{ t(sectionGroup.section, 'heading') }}</h3>
-              </div>
-              <div v-for="subsectionGroup in sectionGroup.subsections"
-                :key="subsectionGroup.subsection" class="ml-4">
-                <h4 class="!text-[1rem] !font-medium !mb-2 -ml-1 md:ml-0">{{
-                  subsectionGroup.subsection
-                  }}</h4>
-                <div
-                  class="relative flex flex-wrap gap-2 p-2 ml-1 md:ml-3 before:absolute before:-ml-4 before:-mt-2 before:h-full before:w-1 before:rounded-full before:bg-secondary">
-                  <skill-badge v-for="tag in subsectionGroup.tags" :key="tag.id" :item="tag" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     <div class="divider">
