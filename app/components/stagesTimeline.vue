@@ -102,11 +102,18 @@ function handleHtmlClick(e: MouseEvent): void {
   <div v-if="(items && items.length > 0)">
     <h3 v-if="type === 'career'">{{ tStatic('my_career_stages') }}</h3>
     <h3 v-else-if="type === 'educational'">{{ tStatic('my_education_stages') }}</h3>
-    <ol
+    <ol :class="{ 'career-timeline': type === 'career' }"
       class="relative !pl-1 md:!pl-3 space-y-8 before:absolute before:-ml-px before:h-full before:w-1 before:rounded-full before:bg-secondary">
       <li v-for="(stage, stageIndex) in items" :key="stage.id" class="list-none">
-        <div class="relative flex items-start gap-2">
-          <span v-if="milestoneStyle === 'circle'"
+        <div class="relative flex items-start gap-2"
+          :style="type === 'career' ? { '--circle': `${circleSize(stage)}px` } : {}">
+          <!-- career stages: the milestone is a circle whose size reflects the duration -->
+          <div v-if="type === 'career'" class="duration-column">
+            <div class="duration-circle" :class="isOngoing(stage) ? 'border-dotted' : 'border-solid'">
+              <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
+            </div>
+          </div>
+          <span v-else-if="milestoneStyle === 'circle'"
             class="-mt-1 rounded-full bg-secondary size-5 shrink-0 ring-2 ring-base-100  -ml-2.25">
           </span>
           <span v-else-if="milestoneStyle === 'square'"
@@ -121,12 +128,7 @@ function handleHtmlClick(e: MouseEvent): void {
             <span class="triangle shrink-0 bg-secondary">
             </span>
           </div>
-          <div class="relative flex flex-col w-full gap-2 -mt-1"
-            :style="type === 'career' ? { '--circle': `${circleSize(stage)}px` } : {}">
-            <div v-if="type === 'career' && durationParts(stage).length" class="duration-circle"
-              :class="isOngoing(stage) ? 'border-dotted' : 'border-solid'">
-              <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
-            </div>
+          <div class="relative flex flex-col w-full gap-2 -mt-1" :class="{ 'circle-min-height': type === 'career' }">
             <div
               class="flex flex-col flex-wrap items-start justify-between gap-2 text-sm font-medium md:flex-row text-secondary-content dark:text-secondary-content-dark">
               <div class="flex">
@@ -163,7 +165,7 @@ function handleHtmlClick(e: MouseEvent): void {
               </div>
               <div>{{ t(stage, 'location') }}</div>
             </div>
-            <div v-if="type === 'career'" class="font-bold text-base-content circle-gap">
+            <div v-if="type === 'career'" class="font-bold text-base-content">
               <p class="text-lg">
                 {{ t(stage, 'position') }}
               </p>
@@ -193,8 +195,7 @@ function handleHtmlClick(e: MouseEvent): void {
                 </div>
               </div>
             </div>
-            <div v-if="t(stage, 'additional_info')" class="relative"
-              :class="{ 'circle-gap': type === 'career' }">
+            <div v-if="t(stage, 'additional_info')" class="relative">
               <div :ref="el => setDescriptionRef(stage.id, el)" v-html="t(stage, 'additional_info')"
                 class="overflow-hidden text-sm stage-description"
                 :class="{ 'collapsed': overflowing.has(stage.id) && !expanded.has(stage.id) }"
@@ -221,26 +222,43 @@ function handleHtmlClick(e: MouseEvent): void {
 <style scoped>
 @reference "~/assets/css/main.css";
 
-/* career duration bubble: sits on the right below date/location; smaller on mobile */
-.duration-circle {
-  @apply absolute right-0 flex flex-col items-center justify-center text-xs font-bold leading-tight text-center border-2 rounded-full top-14 md:top-8 bg-secondary/25 border-secondary text-base-content;
-  width: calc(var(--circle) * 0.75);
-  height: calc(var(--circle) * 0.75);
+/* career timeline: the line runs through the centre of the duration circles; smaller on mobile */
+.career-timeline {
+  --column: 76px;
+  --circle-scale: 0.7;
+  padding-left: 0 !important;
 }
 
-.circle-gap {
-  padding-right: calc(var(--circle) * 0.75 + 0.75rem);
+.career-timeline::before {
+  left: calc(var(--column) / 2 - 2px);
+  margin-left: 0;
+}
+
+.duration-column {
+  @apply flex justify-center -mt-1 shrink-0;
+  width: var(--column);
+}
+
+.duration-circle {
+  @apply flex flex-col items-center justify-center font-bold leading-tight text-center border-2 rounded-full ring-4 ring-base-100 border-secondary text-base-content;
+  width: max(48px, calc(var(--circle) * var(--circle-scale)));
+  height: max(48px, calc(var(--circle) * var(--circle-scale)));
+  font-size: 0.625rem;
+  background: color-mix(in oklab, var(--color-secondary) 25%, var(--color-base-100));
+}
+
+.circle-min-height {
+  min-height: max(48px, calc(var(--circle) * var(--circle-scale)));
 }
 
 @media (min-width: 48rem) {
-  .duration-circle {
-    @apply text-sm;
-    width: var(--circle);
-    height: var(--circle);
+  .career-timeline {
+    --column: 104px;
+    --circle-scale: 1;
   }
 
-  .circle-gap {
-    padding-right: calc(var(--circle) + 1rem);
+  .duration-circle {
+    @apply text-sm;
   }
 }
 
