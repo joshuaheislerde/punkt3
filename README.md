@@ -100,3 +100,8 @@ definePageMeta({
   Also replace other hard-coded links like:
       - index.vue and index.vue NuxtLink to="/portfolio"
       - index.vue internal links created from WYSIWYG can map through localePath before router.push.
+
+---
+## License
+
+This project is a fork of [PUNKT3](https://github.com/ludwig-loth/punkt3) by Ludwig Loth and is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
