@@ -207,6 +207,7 @@ class DirectusAdapter {
 
     private convertToPublication(directusData: any): Publication {
         return {
+            id: directusData.id,
             title: directusData.title,
             subtitle: directusData.subtitle,
             authors: directusData.authors?.map((author: any) => ({

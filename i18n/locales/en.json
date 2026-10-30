@@ -53,5 +53,11 @@
     "contact_form": "Contact Form",
     "service_provider": "Service Provider and Responsible according to § 5 TMG",
     "opening_line_at": "at",
-    "opening_line_in_progress": "in progress"
+    "opening_line_in_progress": "in progress",
+    "publication_pdf": "PDF",
+    "publication_cite": "Cite (IEEE)",
+    "publication_bibtex": "BibTeX",
+    "publication_copied": "Copied!",
+    "publication_conference": "Conference",
+    "publication_journal": "Journal"
 }
