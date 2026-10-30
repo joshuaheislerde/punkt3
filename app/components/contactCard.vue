@@ -10,7 +10,7 @@ const API_URL = config.public.apiURL
 </script>
 <template>
   <div>
-    <a :href="item.link" target="_blank"
+    <a :href="item.link" target="_blank" rel="noopener noreferrer"
       class="relative flex items-center w-full gap-2 transition-all border-2 rounded-sm cursor-pointer group focus:ring-4 focus:ring-primary bg-accent hover:outline-4 hover:outline-primary post-content-none border-base-content "
       style="text-decoration: none;" tabindex="0">
       <div class="flex items-center w-full gap-2 p-0 group-hover:bg-accent group-hover:rounded-xs">

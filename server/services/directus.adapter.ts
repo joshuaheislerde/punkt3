@@ -76,7 +76,7 @@ class DirectusAdapter {
             socials: directusData.socials?.map((social: any) => ({
                 id: social.id,
                 name: social.name,
-                url: social.link,
+                link: social.link,
                 icon: social.icon,
             })) || [],
             translations: directusData.translations?.map((translation: any) => ({
