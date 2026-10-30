@@ -106,14 +106,13 @@ function handleHtmlClick(e: MouseEvent) {
                     <p v-if="landingData" ref="htmlLink" class="text-xl text-left md:text-2xl"
                         v-html="t(landingData, 'about_me_short')" @click="handleHtmlClick">
                     </p>
-                    <!-- freelance offer: one sentence and a link to the contact page -->
-                    <p class="!mt-0 text-xl text-left md:text-2xl">
-                        {{ tStatic('freelance_teaser') }}
+                    <!-- freelance offer: link to the contact page below the intro text -->
+                    <div class="mt-2 mb-1">
                         <NuxtLink :to="localePath('/contact')"
-                            class="inline-block px-2 mt-1 ml-1 text-sm font-semibold no-underline align-middle transition-all border-2 rounded-sm post-content-none md:text-base bg-primary text-primary-content border-base-content hover:scale-103 focus:outline-2 focus:outline-primary active:scale-97">
+                            class="inline-block px-2 text-sm font-semibold no-underline transition-all border-2 rounded-sm post-content-none md:text-base bg-primary text-primary-content border-base-content hover:scale-103 focus:outline-2 focus:outline-primary active:scale-97">
                             {{ tStatic('freelance_cta') }}
                         </NuxtLink>
-                    </p>
+                    </div>
                 </div>
             </div>
             <nav class="relative flex flex-col sm:my-11" ref="menu_items">
