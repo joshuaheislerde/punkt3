@@ -31,7 +31,7 @@ const cvImage = computed<string | null>(() => {
       <div
         class="flex flex-col items-center w-full gap-2 border-2 border-dotted rounded-sm md:justify-between md:flex-row border-base-200">
         <div
-          class="flex flex-col w-full md:w-fit *:flex *:flex-col *:items-start *:px-2 *:py-1.5 *:justify-start md:*:flex-row md:*:items-center md:*:p-2 text-secondary-content dark:text-secondary-content-dark font-medium">
+          class="flex flex-col w-full md:w-fit *:flex *:flex-col *:items-start *:px-2 *:py-1.5 *:gap-1 *:justify-start md:*:gap-0 md:*:flex-row md:*:items-center md:*:p-2 text-secondary-content dark:text-secondary-content-dark font-medium">
           <h2>{{ t(cvStore.cvData, 'welcome_heading') }}</h2>
           <div v-if="currentStages.length" class="!items-start">
             <div class="profile-label">{{ tStatic('currently') }}</div>
@@ -58,7 +58,7 @@ const cvImage = computed<string | null>(() => {
               <div class="single-dot-secondary">
               </div>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 mt-1 md:mt-0">
               <a v-for="social in contactStore.contactData.socials" :key="social.id" :href="social.link"
                 target="_blank" rel="noopener noreferrer" :title="social.name" :aria-label="social.name"
                 class="post-content-none transition-transform hover:scale-110 focus:scale-110">
