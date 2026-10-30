@@ -51,7 +51,7 @@ async function copy(text: string, key: string): Promise<void> {
 
 <template>
   <ol v-if="(items && items.length > 0)"
-    class="relative space-y-10 before:absolute before:h-full before:w-1 before:rounded-full before:bg-secondary !pl-1 md:!pl-3 post-content-none">
+    class="relative space-y-6 before:absolute before:h-full before:w-1 before:rounded-full before:bg-secondary !pl-1 md:!pl-3 post-content-none">
     <li v-for="group in groupedByYear" :key="group.year" class="list-none post-content-none">
       <div class="relative flex items-center gap-3 -ml-2">
         <span v-if="milestoneStyle === 'circle'"
@@ -72,50 +72,41 @@ async function copy(text: string, key: string): Promise<void> {
         <span class="text-xl font-bold">{{ group.year }}</span>
       </div>
 
-      <div class="mt-3 ml-5 md:ml-6">
+      <div class="mt-2 ml-5 md:ml-6">
         <article v-for="(pub, pubIndex) in group.publications" :key="pub.id">
-          <div class="flex flex-col gap-1">
-            <span class="text-lg font-bold leading-snug">{{ fullTitle(pub) }}</span>
-            <span v-if="pub.authors?.length">
+          <div class="font-bold leading-snug">{{ fullTitle(pub) }}</div>
+          <div class="mt-0.5 text-sm leading-relaxed">
+            <template v-if="pub.authors?.length">
               <template v-for="(author, idx) in pub.authors" :key="idx">
-                <span :class="isMe(author) ? 'font-bold underline decoration-primary decoration-2 underline-offset-3' : ''">
+                <span :class="isMe(author) ? 'font-bold underline decoration-primary decoration-2 underline-offset-2' : ''">
                   {{ [initials(author), author.prefix, author.last_name].filter(Boolean).join(' ') }}</span><span
                   v-if="idx < pub.authors.length - 1">, </span>
-              </template>
-            </span>
-            <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-base-content/80">
-              <span class="px-1.5 text-xs font-semibold uppercase rounded-xs bg-base-200 text-base-content">
-                {{ pub.journal ? tStatic('publication_journal') : tStatic('publication_conference') }}
+              </template><span>. </span>
+            </template>
+            <span class="italic text-base-content/80">{{ pub.journal || pub.conference }}</span><span
+              v-if="pub.location" class="text-base-content/80">, {{ pub.location }}</span><span>.</span>
+            <span class="inline-flex flex-wrap gap-1 ml-1 align-middle">
+              <a v-if="pub.file" :href="`${API_URL}/assets/${pub.file}`" target="_blank" rel="noopener"
+                class="post-content-none pub-action">{{ tStatic('publication_pdf') }}</a>
+              <a v-if="pub.identifier?.type === 'DOI' && pub.identifier.value"
+                :href="`https://doi.org/${pub.identifier.value}`" target="_blank" rel="noopener"
+                :title="pub.identifier.value" class="post-content-none pub-action">DOI</a>
+              <span v-else-if="pub.identifier?.value" class="pub-action !cursor-default">
+                {{ pub.identifier.type }}: {{ pub.identifier.value }}
               </span>
-              <span>
-                <span class="italic">{{ pub.journal || pub.conference }}</span><template
-                  v-if="pub.location"> · {{ pub.location }}</template><template
-                  v-if="pub.publisher"> · {{ pub.publisher }}</template>
-              </span>
+              <a v-else-if="pub.url" :href="pub.url" target="_blank" rel="noopener"
+                class="post-content-none pub-action">URL</a>
+              <button type="button" class="pub-action" @click="copy(toIeee(pub), `ieee-${pub.id}`)">
+                {{ copiedKey === `ieee-${pub.id}` ? tStatic('publication_copied') : tStatic('publication_cite') }}
+              </button>
+              <button type="button" class="pub-action" @click="copy(toBibtex(pub), `bib-${pub.id}`)">
+                {{ copiedKey === `bib-${pub.id}` ? tStatic('publication_copied') : tStatic('publication_bibtex') }}
+              </button>
             </span>
-          </div>
-
-          <div class="flex flex-wrap gap-2 mt-3">
-            <a v-if="pub.file" :href="`${API_URL}/assets/${pub.file}`" target="_blank" rel="noopener"
-              class="post-content-none pub-action">{{ tStatic('publication_pdf') }}</a>
-            <a v-if="pub.identifier?.type === 'DOI' && pub.identifier.value"
-              :href="`https://doi.org/${pub.identifier.value}`" target="_blank" rel="noopener"
-              class="post-content-none pub-action">DOI: {{ pub.identifier.value }}</a>
-            <span v-else-if="pub.identifier?.value" class="pub-action !cursor-default">
-              {{ pub.identifier.type }}: {{ pub.identifier.value }}
-            </span>
-            <a v-else-if="pub.url" :href="pub.url" target="_blank" rel="noopener"
-              class="post-content-none pub-action">URL</a>
-            <button type="button" class="pub-action" @click="copy(toIeee(pub), `ieee-${pub.id}`)">
-              {{ copiedKey === `ieee-${pub.id}` ? tStatic('publication_copied') : tStatic('publication_cite') }}
-            </button>
-            <button type="button" class="pub-action" @click="copy(toBibtex(pub), `bib-${pub.id}`)">
-              {{ copiedKey === `bib-${pub.id}` ? tStatic('publication_copied') : tStatic('publication_bibtex') }}
-            </button>
           </div>
 
           <div v-if="group.publications[pubIndex + 1]" class="divider">
-            <div class="h-fit my-5 max-w-full border-t-3 border-dotted !border-base-200">
+            <div class="h-fit my-3 max-w-full border-t-3 border-dotted !border-base-200">
             </div>
           </div>
         </article>
@@ -127,7 +118,7 @@ async function copy(text: string, key: string): Promise<void> {
 @reference "~/assets/css/main.css";
 
 .pub-action {
-  @apply px-2 py-0.5 text-sm font-semibold transition-all border-2 rounded-sm cursor-pointer bg-accent text-accent-content border-base-content hover:bg-primary hover:text-primary-content focus:outline-2 focus:outline-primary active:scale-97;
+  @apply px-1.5 text-xs/5 font-semibold transition-all border rounded-sm cursor-pointer bg-accent text-accent-content border-base-content hover:bg-primary hover:text-primary-content focus:outline-2 focus:outline-primary active:scale-97;
 }
 
 .triangle {

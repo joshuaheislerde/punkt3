@@ -57,7 +57,5 @@
     "publication_pdf": "PDF",
     "publication_cite": "Cite (IEEE)",
     "publication_bibtex": "BibTeX",
-    "publication_copied": "Copied!",
-    "publication_conference": "Conference",
-    "publication_journal": "Journal"
+    "publication_copied": "Copied!"
 }
