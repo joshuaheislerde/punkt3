@@ -5,6 +5,7 @@ export interface Landing {
     initials: string | null;
     my_name: string | null;
     image: string | null;
+    opening_line_mode: 'custom' | 'current_stages' | null; // 'current_stages' builds the opening line from the ongoing CV stages
     menu_items: MenuItem[];
     translations: LandingTranslation[];
 }

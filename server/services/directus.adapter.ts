@@ -27,6 +27,7 @@ class DirectusAdapter {
             initials: directusData.initials,
             my_name: directusData.my_name,
             image: directusData.image,
+            opening_line_mode: directusData.opening_line_mode ?? 'custom',
             menu_items: directusData.menu_items?.map((item: any) => ({
                 id: item.id,
                 slug: item.slug,

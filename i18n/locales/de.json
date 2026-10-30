@@ -51,5 +51,7 @@
     "legal_notice": "Impressum",
     "contact": "Kontaktmöglichkeiten",
     "contact_form": "Kontaktformular",
-    "service_provider": "Diensteanbieter und Verantwortlicher gemäß § 5 TMG"
+    "service_provider": "Diensteanbieter und Verantwortlicher gemäß § 5 TMG",
+    "opening_line_at": "bei",
+    "opening_line_in_progress": "laufend"
 }

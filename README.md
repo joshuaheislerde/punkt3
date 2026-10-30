@@ -17,6 +17,14 @@ To configure PUNKT3, you can modify the environment variables in the `.env` file
 - `NUXT_BACKEND_ADAPTER`: Choose the backend service [directus] (more adapters in development)
 - `NUXT_API_URL`: The URL of your API endpoint.
 
+### Opening line on the landing page
+
+The opening line on the landing page can either show a custom text or be generated from your CV.
+Add a field `opening_line_mode` to the `Landing` collection in Directus (type: string, interface: dropdown) with the choices:
+
+- `custom` (default): shows the translated `opening_line` text.
+- `current_stages`: lists all ongoing career and educational stages (no end date or "until today") from the CV, e.g. "Software Engineer – at Phoenix Contact". Falls back to `opening_line` if there are none.
+
 ### Sub menus
 
 Submenus in PUNKT3 allow you to add contextual navigation to your pages with the layout `sidebars`, making it easier for users to explore related content. You can configure submenus to display project lists, top-level menus, or custom links, depending on your needs.

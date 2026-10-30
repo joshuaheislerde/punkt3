@@ -51,5 +51,7 @@
     "legal_notice": "Legal notice",
     "contact": "Contact Options",
     "contact_form": "Contact Form",
-    "service_provider": "Service Provider and Responsible according to § 5 TMG"
+    "service_provider": "Service Provider and Responsible according to § 5 TMG",
+    "opening_line_at": "at",
+    "opening_line_in_progress": "in progress"
 }

@@ -10,8 +10,9 @@ const API_URL: string = config.public.apiURL
 
 const designStore = useDesignStore();
 const landingStore = useLandingStore();
+const cvStore = useCvStore();
 
-const { t, tMenuItem } = useTranslation()
+const { t, tMenuItem, tStatic } = useTranslation()
 const { landingData } = storeToRefs(landingStore) as { landingData: Ref<Landing | null> }
 
 useLandingSeo(landingData)
@@ -30,6 +31,23 @@ saveDimensions(about_me, 'about_me')
 saveDimensions(menu_items, 'menu_items')
 
 const mainMenuItems = computed((): Array<MenuItem> => landingData.value?.menu_items ?? [])
+
+// With opening_line_mode 'current_stages' the opening line is built from the ongoing CV stages.
+// Falls back to the custom opening line if there are no ongoing stages.
+const currentStageLines = computed((): Array<{ key: string, title: string, subtitle: string }> => {
+    if (landingData.value?.opening_line_mode !== 'current_stages') return []
+    const career = cvStore.currentCareerStages.map(stage => ({
+        key: `career-${stage.id}`,
+        title: t(stage, 'position'),
+        subtitle: `${tStatic('opening_line_at')} ${t(stage, 'company')}`,
+    }))
+    const education = cvStore.currentEducationalStages.map(stage => ({
+        key: `education-${stage.id}`,
+        title: t(stage, 'degree'),
+        subtitle: `${tStatic('opening_line_in_progress')} · ${t(stage, 'institution')}`,
+    }))
+    return [...career, ...education].filter(line => line.title)
+})
 
 const htmlLink = ref<HTMLElement | null>(null)
 
@@ -54,7 +72,14 @@ function handleHtmlClick(e: MouseEvent) {
     <div v-if="landingData" class="relative">
         <div class="flex flex-col items-center justify-center max-w-5xl">
             <div class="my-11" ref="opening_line">
-                <h1
+                <h1 v-if="currentStageLines.length"
+                    class="flex flex-col max-w-sm gap-4 p-4 text-center rounded-sm sm:max-w-lg bg-base-100">
+                    <span v-for="line in currentStageLines" :key="line.key" class="flex flex-col">
+                        <span class="text-4xl/10 sm:text-5xl/12">{{ line.title }}</span>
+                        <span class="font-sans text-base sm:text-lg text-base-content/70">{{ line.subtitle }}</span>
+                    </span>
+                </h1>
+                <h1 v-else
                     class="max-w-sm p-4 text-center rounded-sm sm:max-w-lg text-5xl/14 sm:text-7xl/16 bg-base-100">
                     {{ t(landingData, 'opening_line') }}
                 </h1>

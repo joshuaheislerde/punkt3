@@ -68,10 +68,31 @@ export const useCvStore = defineStore('CV', () => {
     return Math.floor(totalMonths / 12);
   });
 
+  // Stages without an end date (or flagged "until today") that have already started
+  const isOngoing = (stage: { from: string | null; to: string | null; until_today: boolean | null }): boolean => {
+    const now = new Date();
+    if (stage.from && new Date(stage.from) > now) return false;
+    return !!stage.until_today || !stage.to || new Date(stage.to) >= now;
+  };
+
+  const currentCareerStages = computed((): CareerStage[] =>
+    (cvData.value?.career_stages ?? [])
+      .filter(stage => stage.status !== 'draft' && stage.status !== 'archived' && isOngoing(stage))
+      .sort((a, b) => new Date(b.from ?? 0).getTime() - new Date(a.from ?? 0).getTime())
+  );
+
+  const currentEducationalStages = computed((): EducationalStage[] =>
+    (cvData.value?.educational_stages ?? [])
+      .filter(isOngoing)
+      .sort((a, b) => new Date(b.from ?? 0).getTime() - new Date(a.from ?? 0).getTime())
+  );
+
   return {
     setData,
     clearStore,
     cvData,
-    workExperienceYears
+    workExperienceYears,
+    currentCareerStages,
+    currentEducationalStages
   } as const;
 });
