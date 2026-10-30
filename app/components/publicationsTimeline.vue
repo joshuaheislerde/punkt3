@@ -84,9 +84,9 @@ async function copy(text: string, key: string): Promise<void> {
               </template><span>. </span>
             </template>
             <span class="italic text-base-content/80">{{ pub.journal || pub.conference }}</span><span
-              v-if="pub.location" class="text-base-content/80">, {{ pub.location }}</span><span>.</span>
+              v-if="pub.location" class="text-base-content/80">, {{ pub.location }}</span><span>. </span>
             <span v-if="pub.identifier?.type === 'DOI' && pub.identifier.value" class="whitespace-nowrap">
-              DOI: <a :href="`https://doi.org/${pub.identifier.value}`" target="_blank" rel="noopener">{{
+              <a :href="`https://doi.org/${pub.identifier.value}`" target="_blank" rel="noopener">{{
                 pub.identifier.value }}</a>
             </span>
             <span v-else-if="pub.identifier?.value" class="whitespace-nowrap">
@@ -95,7 +95,7 @@ async function copy(text: string, key: string): Promise<void> {
             <span v-else-if="pub.url">
               <a :href="pub.url" target="_blank" rel="noopener">{{ pub.url }}</a>
             </span>
-            <span class="inline-flex flex-wrap gap-1 ml-1 align-middle">
+            <span class="inline-flex flex-wrap gap-1 ml-3 align-middle">
               <a v-if="pub.file" :href="`${API_URL}/assets/${pub.file}`" target="_blank" rel="noopener"
                 class="post-content-none pub-action">{{ tStatic('publication_pdf') }}</a>
               <button type="button" class="pub-action" @click="copy(toIeee(pub), `ieee-${pub.id}`)">
