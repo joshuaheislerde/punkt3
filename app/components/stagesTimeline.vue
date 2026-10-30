@@ -46,8 +46,12 @@ function markerSize(stage: CareerStage | EducationalStage): number {
   return Math.round(Math.max(MARKER_MIN, MARKER_MAX * ratio))
 }
 
-function startYear(stage: CareerStage | EducationalStage): string {
-  return stage.from ? String(new Date(stage.from).getFullYear()) : ''
+// all years a stage covers, newest first (the line runs from the latest year at the top to the start year at the bottom)
+function stageYears(stage: CareerStage | EducationalStage): number[] {
+  if (!stage.from) return []
+  const start = new Date(stage.from).getFullYear()
+  const end = stage.to ? new Date(stage.to).getFullYear() : new Date().getFullYear()
+  return Array.from({ length: Math.max(1, end - start + 1) }, (_, i) => end - i)
 }
 
 function isOngoing(stage: CareerStage | EducationalStage): boolean {
@@ -105,15 +109,16 @@ function handleHtmlClick(e: MouseEvent): void {
     <ol
       class="relative space-y-8 duration-timeline before:absolute before:h-full before:w-1 before:rounded-full before:bg-secondary">
       <li v-for="(stage, stageIndex) in items" :key="stage.id" class="list-none">
-        <div class="relative flex items-start gap-2" :style="{ '--marker': `${markerSize(stage)}px` }">
-          <!-- start year left of the line, marker on the line; its size reflects the duration -->
-          <div class="timeline-marker">
-            <span class="timeline-year">{{ startYear(stage) }}</span>
-            <div class="marker-column">
-              <div class="duration-marker"
-                :class="[milestoneStyle === 'square' ? 'rounded-md' : 'rounded-full', isOngoing(stage) ? 'border-dotted' : 'border-solid']">
-                <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
-              </div>
+        <div class="relative flex items-stretch gap-2"
+          :style="{ '--marker': `${markerSize(stage)}px`, '--ticks': stageYears(stage).length }">
+          <!-- marker on the line (size reflects the duration), below it the covered years along the line -->
+          <div class="marker-column">
+            <div class="duration-marker"
+              :class="[milestoneStyle === 'square' ? 'rounded-md' : 'rounded-full', isOngoing(stage) ? 'border-dotted' : 'border-solid']">
+              <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
+            </div>
+            <div class="year-ticks">
+              <span v-for="year in stageYears(stage)" :key="year">{{ year }}</span>
             </div>
           </div>
           <div class="relative flex flex-col w-full gap-2 -mt-1 marker-min-height">
@@ -210,31 +215,27 @@ function handleHtmlClick(e: MouseEvent): void {
 <style scoped>
 @reference "~/assets/css/main.css";
 
-/* timeline: start years on the left, the line runs through the centre of the duration markers; smaller on mobile */
+/* timeline: the line runs through the centre of the duration markers, the covered years are listed along the line; smaller on mobile */
 .duration-timeline {
-  --years: 2rem;
   --column: 56px;
   --marker-scale: 0.85;
   padding-left: 0 !important;
 }
 
 .duration-timeline::before {
-  left: calc(var(--years) + var(--column) / 2 - 2px);
-}
-
-.timeline-marker {
-  @apply flex items-center -mt-1 shrink-0;
-}
-
-.timeline-year {
-  @apply pr-1 font-semibold text-right text-secondary-content dark:text-secondary-content-dark;
-  width: var(--years);
-  font-size: 0.625rem;
+  left: calc(var(--column) / 2 - 2px);
 }
 
 .marker-column {
-  @apply flex justify-center;
+  @apply flex flex-col items-center -mt-1 shrink-0;
   width: var(--column);
+}
+
+/* years sit left of the line, spread from below the marker down to the end of the stage */
+.year-ticks {
+  @apply flex flex-col justify-between flex-1 w-full pt-1 font-semibold leading-none text-right text-secondary-content dark:text-secondary-content-dark;
+  padding-right: calc(50% + 5px);
+  font-size: 0.5625rem;
 }
 
 .duration-marker {
@@ -246,18 +247,17 @@ function handleHtmlClick(e: MouseEvent): void {
 }
 
 .marker-min-height {
-  min-height: max(40px, calc(var(--marker) * var(--marker-scale)));
+  min-height: calc(max(40px, var(--marker) * var(--marker-scale)) + var(--ticks) * 1.25rem);
 }
 
 @media (min-width: 48rem) {
   .duration-timeline {
-    --years: 2.5rem;
     --column: 64px;
     --marker-scale: 1;
   }
 
-  .timeline-year {
-    @apply text-xs;
+  .year-ticks {
+    font-size: 0.625rem;
   }
 
   .duration-marker {
