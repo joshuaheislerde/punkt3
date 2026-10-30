@@ -102,20 +102,19 @@ function handleHtmlClick(e: MouseEvent) {
                         :alt="`Portrait of ${landingData.my_name}`"
                         class="object-cover ml-4 w-22 h-22 sm:w-32 sm:h-32 outline-2 rounded-xs" />
                 </picture>
-                <div class="flex px-3 rounded-sm post-content bg-base-100 mt-9 sm:mt-0">
+                <div class="flex flex-col px-3 rounded-sm post-content bg-base-100 mt-9 sm:mt-0">
                     <p v-if="landingData" ref="htmlLink" class="text-xl text-left md:text-2xl"
                         v-html="t(landingData, 'about_me_short')" @click="handleHtmlClick">
                     </p>
+                    <!-- freelance offer: one sentence and a link to the contact page -->
+                    <p class="!mt-0 text-xl text-left md:text-2xl">
+                        {{ tStatic('freelance_teaser') }}
+                        <NuxtLink :to="localePath('/contact')"
+                            class="inline-block px-2 mt-1 ml-1 text-sm font-semibold no-underline align-middle transition-all border-2 rounded-sm post-content-none md:text-base bg-primary text-primary-content border-base-content hover:scale-103 focus:outline-2 focus:outline-primary active:scale-97">
+                            {{ tStatic('freelance_cta') }}
+                        </NuxtLink>
+                    </p>
                 </div>
-            </div>
-            <!-- freelance offer: one sentence and a link to the contact page -->
-            <div
-                class="flex flex-col items-center gap-3 px-4 py-3 mx-6 text-center rounded-sm sm:flex-row sm:text-left bg-base-100">
-                <p class="text-lg md:text-xl">{{ tStatic('freelance_teaser') }}</p>
-                <NuxtLink :to="localePath('/contact')"
-                    class="px-3 py-1 text-sm font-semibold transition-all border-2 rounded-sm shrink-0 bg-primary text-primary-content border-base-content hover:scale-103 focus:outline-2 focus:outline-primary active:scale-97">
-                    {{ tStatic('freelance_cta') }}
-                </NuxtLink>
             </div>
             <nav class="relative flex flex-col sm:my-11" ref="menu_items">
                 <div class="grid grid-cols-1 sm:gap-10 sm:grid-cols-2 mt-25 sm:mt-20">
