@@ -58,8 +58,6 @@
     "publication_cite": "Zitieren (IEEE)",
     "publication_bibtex": "BibTeX",
     "publication_copied": "Kopiert!",
-    "duration_years": "{n} J. | {n} J.",
-    "duration_months": "{n} Mon. | {n} Mon.",
     "show_more": "Mehr anzeigen",
     "show_less": "Weniger anzeigen",
     "about_cta": "Interesse an einer Zusammenarbeit oder einem fachlichen Austausch?",
@@ -67,5 +65,7 @@
     "about_cta_publications": "Publikationen ansehen",
     "about_cta_projects": "Projekte ansehen",
     "currently": "Aktuell",
-    "profiles": "Profile"
+    "profiles": "Profile",
+    "duration_years_short": "{n}J",
+    "duration_months_short": "{n}M"
 }

@@ -27,20 +27,20 @@ function durationInMonths(stage: CareerStage | EducationalStage): number {
   return Math.max(0, (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth() + 1)
 }
 
-// ["3 yrs", "2 mos"]
+// ["3y", "2m"]
 function durationParts(stage: CareerStage | EducationalStage): string[] {
   const months = durationInMonths(stage)
   const years = Math.floor(months / 12)
   const rest = months % 12
   return [
-    years ? $t('duration_years', years) : '',
-    rest ? $t('duration_months', rest) : '',
+    years ? $t('duration_years_short', { n: years }) : '',
+    rest ? $t('duration_months_short', { n: rest }) : '',
   ].filter(Boolean)
 }
 
 // career stages get a circle whose area grows with the duration (diameter ~ sqrt of months)
-const CIRCLE_MIN = 56
-const CIRCLE_MAX = 104
+const CIRCLE_MIN = 44
+const CIRCLE_MAX = 64
 const maxMonths = computed((): number =>
   Math.max(1, ...(props.items ?? []).map(stage => durationInMonths(stage)))
 )
@@ -224,8 +224,8 @@ function handleHtmlClick(e: MouseEvent): void {
 
 /* career timeline: the line runs through the centre of the duration circles; smaller on mobile */
 .career-timeline {
-  --column: 76px;
-  --circle-scale: 0.7;
+  --column: 56px;
+  --circle-scale: 0.85;
   padding-left: 0 !important;
 }
 
@@ -240,25 +240,25 @@ function handleHtmlClick(e: MouseEvent): void {
 }
 
 .duration-circle {
-  @apply flex flex-col items-center justify-center font-bold leading-tight text-center border-2 rounded-full ring-4 ring-base-100 border-secondary text-base-content;
-  width: max(48px, calc(var(--circle) * var(--circle-scale)));
-  height: max(48px, calc(var(--circle) * var(--circle-scale)));
+  @apply flex flex-row items-center justify-center gap-0.5 font-bold whitespace-nowrap leading-tight text-center border-2 rounded-full ring-4 ring-base-100 border-secondary text-base-content;
+  width: max(40px, calc(var(--circle) * var(--circle-scale)));
+  height: max(40px, calc(var(--circle) * var(--circle-scale)));
   font-size: 0.625rem;
   background: color-mix(in oklab, var(--color-secondary) 25%, var(--color-base-100));
 }
 
 .circle-min-height {
-  min-height: max(48px, calc(var(--circle) * var(--circle-scale)));
+  min-height: max(40px, calc(var(--circle) * var(--circle-scale)));
 }
 
 @media (min-width: 48rem) {
   .career-timeline {
-    --column: 104px;
+    --column: 64px;
     --circle-scale: 1;
   }
 
   .duration-circle {
-    @apply text-sm;
+    font-size: 0.6875rem;
   }
 }
 
