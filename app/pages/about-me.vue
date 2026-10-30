@@ -31,11 +31,11 @@ const cvImage = computed<string | null>(() => {
       <div
         class="flex flex-col items-center w-full gap-2 border-2 border-dotted rounded-sm md:justify-between md:flex-row border-base-200">
         <div
-          class="flex flex-col w-fit *:flex *:flex-row *:items-center *:p-2 *:justify-start text-secondary-content dark:text-secondary-content-dark font-medium">
+          class="flex flex-col w-full md:w-fit *:flex *:flex-col *:items-start *:px-2 *:py-1.5 *:justify-start md:*:flex-row md:*:items-center md:*:p-2 text-secondary-content dark:text-secondary-content-dark font-medium">
           <h2>{{ t(cvStore.cvData, 'welcome_heading') }}</h2>
           <div v-if="currentStages.length" class="!items-start">
-            <div class="basis-32 shrink-0">{{ tStatic('currently') }}</div>
-            <div class="pt-1.5 basis-4 shrink-0">
+            <div class="profile-label">{{ tStatic('currently') }}</div>
+            <div class="hidden pt-1.5 basis-4 shrink-0 md:block">
               <div class="single-dot-secondary">
               </div>
             </div>
@@ -44,8 +44,8 @@ const cvImage = computed<string | null>(() => {
             </div>
           </div>
           <div>
-            <div class="basis-32 shrink-0">{{ tStatic('work_experience') }}</div>
-            <div class="basis-4 shrink-0">
+            <div class="profile-label">{{ tStatic('work_experience') }}</div>
+            <div class="hidden basis-4 shrink-0 md:block">
               <div class="single-dot-secondary">
               </div>
             </div>
@@ -53,8 +53,8 @@ const cvImage = computed<string | null>(() => {
               tStatic('years_in_field') }}</div>
           </div>
           <div v-if="contactStore.contactData?.socials?.length">
-            <div class="basis-32 shrink-0">{{ tStatic('profiles') }}</div>
-            <div class="basis-4 shrink-0">
+            <div class="profile-label">{{ tStatic('profiles') }}</div>
+            <div class="hidden basis-4 shrink-0 md:block">
               <div class="single-dot-secondary">
               </div>
             </div>
@@ -69,10 +69,10 @@ const cvImage = computed<string | null>(() => {
             </div>
           </div>
           <div v-if="t(cvStore.cvData, 'work_status')">
-            <div class="relative basis-32 shrink-0" v-if="cvStore.cvData.work_status_attention" >
+            <div class="relative profile-label" v-if="cvStore.cvData.work_status_attention" >
               <div class="relative">{{ tStatic('career_status') }}</div>
             </div>
-            <div class="basis-4 shrink-0" v-if="cvStore.cvData.work_status_attention">
+            <div class="hidden basis-4 shrink-0 md:block" v-if="cvStore.cvData.work_status_attention">
               <star-bling v-if="cvStore.cvData.work_status_attention"
                 class="relative -left-2.5 size-7" animation :interval="5000"></star-bling>
               <div v-else class="single-dot-secondary">
@@ -170,6 +170,11 @@ const cvImage = computed<string | null>(() => {
 
 .cta-action {
   @apply px-3 py-1 text-sm font-semibold transition-all border-2 rounded-sm bg-accent text-accent-content border-base-content hover:bg-primary hover:text-primary-content focus:outline-2 focus:outline-primary active:scale-97;
+}
+
+/* mobile: small label above the value; desktop: label column next to the value */
+.profile-label {
+  @apply text-xs font-semibold tracking-wide uppercase shrink-0 md:text-base md:font-medium md:tracking-normal md:normal-case md:basis-32;
 }
 
 .cta-primary {
