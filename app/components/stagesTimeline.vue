@@ -66,6 +66,31 @@ const visibleYears = computed((): Map<string | number, number[]> => {
   return result
 })
 
+// a stage that overlaps a stage listed above it (e.g. a side job) branches off the main line onto a second track;
+// short overlaps at handovers (up to 2 months) don't count
+const MIN_PARALLEL_MONTHS = 3
+
+function monthIndex(date: Date): number {
+  return date.getFullYear() * 12 + date.getMonth()
+}
+
+function overlapInMonths(a: CareerStage | EducationalStage, b: CareerStage | EducationalStage): number {
+  if (!a.from || !b.from) return 0
+  const start = Math.max(monthIndex(new Date(a.from)), monthIndex(new Date(b.from)))
+  const end = Math.min(
+    monthIndex(a.to ? new Date(a.to) : new Date()),
+    monthIndex(b.to ? new Date(b.to) : new Date()),
+  )
+  return end - start + 1
+}
+
+const parallelStages = computed((): Set<string | number> => {
+  const items = props.items ?? []
+  return new Set(items
+    .filter((stage, index) => items.slice(0, index).some(other => overlapInMonths(stage, other) >= MIN_PARALLEL_MONTHS))
+    .map(stage => stage.id))
+})
+
 function isOngoing(stage: CareerStage | EducationalStage): boolean {
   return !!stage.until_today || !stage.to
 }
@@ -123,8 +148,10 @@ function handleHtmlClick(e: MouseEvent): void {
       <li v-for="(stage, stageIndex) in items" :key="stage.id" class="list-none">
         <div class="relative flex items-stretch gap-2"
           :style="{ '--marker': `${markerSize(stage)}px`, '--ticks': visibleYears.get(stage.id)?.length ?? 0 }">
+          <!-- parallel stages: a second line branches off the main line and merges back -->
+          <span v-if="parallelStages.has(stage.id)" class="parallel-branch" aria-hidden="true"></span>
           <!-- marker on the line (size reflects the duration), below it the covered years along the line -->
-          <div class="marker-column">
+          <div class="marker-column" :class="{ 'is-parallel': parallelStages.has(stage.id) }">
             <div class="duration-marker"
               :class="[milestoneStyle === 'square' ? 'rounded-md' : 'rounded-full', isOngoing(stage) ? 'border-dotted' : 'border-solid']">
               <span v-for="part in durationParts(stage)" :key="part">{{ part }}</span>
@@ -233,6 +260,7 @@ function handleHtmlClick(e: MouseEvent): void {
 .duration-timeline {
   --column: 56px;
   --marker-scale: 0.85;
+  --branch: 18px;
   padding-left: 0 !important;
 }
 
@@ -241,8 +269,23 @@ function handleHtmlClick(e: MouseEvent): void {
 }
 
 .marker-column {
-  @apply flex flex-col items-center -mt-1 shrink-0;
+  @apply relative flex flex-col items-center -mt-1 shrink-0;
   width: var(--column);
+}
+
+/* the second track sits --branch to the right of the main line */
+.marker-column.is-parallel {
+  width: calc(var(--column) + var(--branch));
+  padding-left: var(--branch);
+}
+
+/* forks off the main line above the marker and merges back below the row */
+.parallel-branch {
+  @apply absolute border-4 border-l-0 pointer-events-none rounded-r-xl border-secondary;
+  left: calc(var(--column) / 2 - 2px);
+  width: calc(var(--branch) + 4px);
+  top: -0.875rem;
+  bottom: -0.875rem;
 }
 
 /* years sit left of the line below the marker, evenly spaced, each with a small tick touching the line */
@@ -276,6 +319,7 @@ function handleHtmlClick(e: MouseEvent): void {
   .duration-timeline {
     --column: 64px;
     --marker-scale: 1;
+    --branch: 24px;
   }
 
   .year-ticks {
