@@ -18,15 +18,6 @@ const legalNoticeStore = useLegalNoticeStore()
       <NuxtLink to="/legal-notice" class="text-sm font-medium text-base-content link-highlight">
         {{ tStatic('legal_notice') }}
       </NuxtLink>
-      <div class="hidden sm:block">|</div>
-      <div class="flex items-center justify-center h-full gap-1 text-xs text-base-content">
-        <div><span class="hidden pr-2 md:inline">powered by</span>
-          <a href="https://github.com/ludwig-loth/punkt3" target="_blank" rel="noopener"
-            class="text-sm font-medium text-base-content link-highlight">
-            PUNKT3
-          </a>
-        </div>
-      </div>
     </div>
   </div>
 </template>
